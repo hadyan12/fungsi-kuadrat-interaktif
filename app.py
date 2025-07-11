@@ -34,15 +34,17 @@ Di sini kamu akan belajar bagaimana sebuah **fungsi mengubah input menjadi outpu
 if "percobaan" not in st.session_state:
     st.session_state.percobaan = 0
     st.session_state.riwayat_x = []
+    st.session_state.riwayat_fx = []
     st.session_state.lanjut = True
     st.session_state.step1_done = False
     st.session_state.step2_done = False
     st.session_state.jumlah_salah = 0
     st.session_state.x2_benar = False
+    st.session_state.show_bantuan = False
 
 # Langkah 1 - Eksplorasi
-if not st.session_state.step1_done:
-    with st.expander("\U0001F4D8 Langkah 1: Eksplorasi Fungsi", expanded=True):
+with st.expander("\U0001F4D8 Langkah 1: Eksplorasi Fungsi", expanded=True):
+    if not st.session_state.step1_done:
         st.write("Masukkan nilai x dan tekan tombol **Lihat hasil** untuk melihat bagaimana fungsi bekerja.")
 
         current_try = st.session_state.percobaan
@@ -67,11 +69,12 @@ if not st.session_state.step1_done:
         if st.session_state[f"{key_prefix}_show_result"]:
             x = st.session_state[f"{key_prefix}_x_final"]
             st.info(f"Percobaan ke-{current_try + 1}, nilai x = {x}")
+            fx = f(x)
             st.markdown(f"""
-            - x² = {x}² = {x**2}  
-            - 2x = 2 × {x} = {2*x}  
-            - Jumlah: {x**2} + {2*x} + 1 = {f(x)}  
-            ✅ Maka f({x}) = **{f(x)}**
+            - $x^2$ = {x}² = {x**2}  
+            - $2x$ = 2 × {x} = {2*x}  
+            - Jumlah: {x**2} + {2*x} + 1 = {fx}  
+            ✅ Maka $f({x}) = {fx}$
             """)
 
             col1, col2 = st.columns(2)
@@ -79,6 +82,7 @@ if not st.session_state.step1_done:
                 if st.button("🔁 Coba nilai lain", key=f"{key_prefix}_lanjut"):
                     if x not in st.session_state.riwayat_x:
                         st.session_state.riwayat_x.append(x)
+                        st.session_state.riwayat_fx.append(fx)
                     st.session_state.percobaan += 1
                     st.rerun()
 
@@ -86,15 +90,15 @@ if not st.session_state.step1_done:
                 if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
                     if x not in st.session_state.riwayat_x:
                         st.session_state.riwayat_x.append(x)
+                        st.session_state.riwayat_fx.append(fx)
                     st.session_state.step1_done = True
                     st.rerun()
 
-            st.write("📌 Riwayat nilai x:", st.session_state.riwayat_x)
-
-        if st.session_state.percobaan >= 3:
-            st.info("⚠️ Sudah 3 kali mencoba.")
-            st.session_state.step1_done = True
-            st.rerun()
+    # Tetap tampilkan riwayat meskipun step1 selesai
+    if st.session_state.riwayat_x:
+        st.write("📌 Riwayat nilai x:")
+        for i, x_val in enumerate(st.session_state.riwayat_x):
+            st.markdown(f"- $f({x_val}) = {st.session_state.riwayat_fx[i]}$")
 
 # Langkah 2 - Uji Pemahaman
 if st.session_state.step1_done and not st.session_state.step2_done:
@@ -105,7 +109,7 @@ if st.session_state.step1_done and not st.session_state.step2_done:
         if x2_input in st.session_state.riwayat_x:
             st.warning("⚠️ Nilai ini sudah digunakan. Coba nilai lain.")
         else:
-            jawaban = st.number_input(f"Hitung: f({x2_input}) = {x2_input}² + 2×{x2_input} + 1 = ... ?", step=1, key="jawaban_input")
+            jawaban = st.number_input(f"Hitung: $f({x2_input}) = {x2_input}^2 + 2×{x2_input} + 1 = ?$", step=1, key="jawaban_input")
 
             if st.button("Cek Jawaban", key="cekjawaban"):
                 if jawaban == f(x2_input):
@@ -118,22 +122,25 @@ if st.session_state.step1_done and not st.session_state.step2_done:
                     if sisa > 0:
                         st.error(f"❌ Masih belum tepat. Coba lagi ya. ({sisa} kesempatan lagi)")
                     else:
-                        st.warning("🧠 Sudah 3 kali salah. Yuk kita bantu bareng, kamu tetap yang hitung:")
-                        kuadrat = st.number_input(f"Langkah 1: Hitung {x2_input}² =", step=1, key="kuadrat_bantu")
-                        kali_dua = st.number_input(f"Langkah 2: Hitung 2 × {x2_input} =", step=1, key="kali2_bantu")
-                        total = st.number_input(f"Langkah 3: Hitung {kuadrat} + {kali_dua} + 1 =", step=1, key="total_bantu")
+                        st.session_state.show_bantuan = True
 
-                        if kuadrat == x2_input**2 and kali_dua == 2 * x2_input and total == f(x2_input):
-                            st.success(f"✅ Betul! Maka f({x2_input}) = {total}")
-                            st.session_state.step2_done = True
-                            st.session_state.x2_benar = True
-                        else:
-                            st.info("🔁 Cek kembali perhitunganmu ya!")
+        if st.session_state.show_bantuan:
+            st.warning("🧠 Sudah 3 kali salah. Yuk kita bantu bareng, kamu tetap yang hitung:")
+            kuadrat = st.number_input(f"Langkah 1: Hitung {x2_input}² =", step=1, key="kuadrat_bantu")
+            kali_dua = st.number_input(f"Langkah 2: Hitung 2 × {x2_input} =", step=1, key="kali2_bantu")
+            total = st.number_input(f"Langkah 3: Hitung {kuadrat} + {kali_dua} + 1 =", step=1, key="total_bantu")
+
+            if kuadrat == x2_input**2 and kali_dua == 2 * x2_input and total == f(x2_input):
+                st.success(f"✅ Betul! Maka f({x2_input}) = {total}")
+                st.session_state.step2_done = True
+                st.session_state.x2_benar = True
+            else:
+                st.info("🔁 Cek kembali perhitunganmu ya!")
 
 # Langkah 3 - Visualisasi
 if st.session_state.step2_done and st.session_state.x2_benar:
     with st.expander("📊 Langkah 3: Visualisasi Grafik"):
-        x_vals = list(range(1, 11))
+        x_vals = list(range(-11, 11))
         y_vals = [f(x) for x in x_vals]
 
         fig, ax = plt.subplots(figsize=(8, 5))
