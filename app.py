@@ -45,37 +45,33 @@ if not st.session_state.step1_done:
     with st.expander("📘 Langkah 1: Eksplorasi Fungsi", expanded=True):
         st.write("Masukkan nilai x dan lihat cara kerja fungsi.")
 
-        if "step1_show_lanjutan" not in st.session_state:
-            st.session_state.step1_show_lanjutan = False
-
         x = st.number_input(f"Percobaan ke-{st.session_state.percobaan + 1}: Masukkan nilai x (1–10):",
                             min_value=1, max_value=10, step=1, key=f"x{st.session_state.percobaan}")
 
-        if st.button("Lihat hasil", key=f"cek{st.session_state.percobaan}"):
+        if x not in st.session_state.riwayat_x:
             st.markdown(f"""
             - x² = {x}² = {x**2}  
             - 2x = 2 × {x} = {2*x}  
             - Jumlah: {x**2} + {2*x} + 1 = {f(x)}  
             ✅ Maka f({x}) = **{f(x)}**
             """)
-            st.session_state.riwayat_x.append(x)
-            st.session_state.step1_show_lanjutan = True
 
-        if st.session_state.step1_show_lanjutan:
-            if st.button("🔁 Coba nilai lain"):
-                st.session_state.percobaan += 1
-                st.session_state.step1_show_lanjutan = False
-
-            if st.button("❌ Selesai"):
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🔁 Coba nilai lain", key=f"btn_lanjut_{st.session_state.percobaan}"):
+                if x not in st.session_state.riwayat_x:
+                    st.session_state.riwayat_x.append(x)
+                    st.session_state.percobaan += 1
+                if st.session_state.percobaan >= 3:
+                    st.session_state.step1_done = True
+        with col2:
+            if st.button("❌ Selesai", key="btn_selesai"):
+                if x not in st.session_state.riwayat_x:
+                    st.session_state.riwayat_x.append(x)
                 st.session_state.step1_done = True
-                st.session_state.step1_show_lanjutan = False
-
-        if st.session_state.percobaan >= 3:
-            st.info("⚠️ Cuma bisa 3 kali saja 😊")
-            st.session_state.step1_done = True
-            st.session_state.step1_show_lanjutan = False
 
         st.write("📌 Riwayat nilai x:", st.session_state.riwayat_x)
+
 
 # Langkah 2 - Uji Pemahaman
 if st.session_state.step1_done and not st.session_state.step2_done:
