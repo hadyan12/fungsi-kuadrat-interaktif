@@ -76,7 +76,7 @@ with st.expander("\U0001F4D8 Langkah 1: Eksplorasi Fungsi", expanded=True):
                 st.info(f"Percobaan ke-{current_try + 1}, nilai x = {x}")
                 st.markdown(f"""
                 - $x^2$ = {x}² = {x**2}  
-                - $2x$ = 2 × {x} = {2*x}  
+                - $2x$ = 2×({x}) = {2*x}  
                 - Jumlah: {x**2} + {2*x} + 1 = {fx}  
                 ✅ Maka $f({x}) = {fx}$
                 """)
@@ -117,7 +117,8 @@ if st.session_state.step1_done and not st.session_state.step2_done:
         if x2_input in st.session_state.riwayat_x:
             st.warning("⚠️ Nilai ini sudah digunakan. Coba nilai lain.")
         else:
-            jawaban = st.number_input(f"Hitung: $f({x2_input}) = {x2_input}^2 + 2×{x2_input} + 1 = ?$", step=1, key="jawaban_input")
+            st.latex(f"f({x2_input}) = {x2_input}^2 + 2\\times({x2_input}) + 1 = ?")
+            jawaban = st.number_input("Masukkan hasil perhitunganmu:", step=1, key="jawaban_input")
 
             if st.button("Cek Jawaban", key="cekjawaban"):
                 if jawaban == f(x2_input):
@@ -135,7 +136,7 @@ if st.session_state.step1_done and not st.session_state.step2_done:
         if st.session_state.show_bantuan:
             st.warning("🧠 Sudah 3 kali salah. Yuk kita bantu bareng, kamu tetap yang hitung:")
             kuadrat = st.number_input(f"Langkah 1: Hitung {x2_input}² =", step=1, key="kuadrat_bantu")
-            kali_dua = st.number_input(f"Langkah 2: Hitung 2 × {x2_input} =", step=1, key="kali2_bantu")
+            kali_dua = st.number_input(f"Langkah 2: Hitung 2 × ({x2_input}) =", step=1, key="kali2_bantu")
             total = st.number_input(f"Langkah 3: Hitung {kuadrat} + {kali_dua} + 1 =", step=1, key="total_bantu")
 
             if kuadrat == x2_input**2 and kali_dua == 2 * x2_input and total == f(x2_input):
