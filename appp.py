@@ -56,7 +56,8 @@ if "data_titik" not in st.session_state:
     st.session_state.salah_input_x1x2 = 0
     st.session_state.tiga_titik = []
     st.session_state.grafik_benar_muncul = False
-    st.session_state.x_benar_ditebak = set() # Menambahkan set untuk menyimpan nilai x yang sudah ditebak benar
+    st.session_state.x_benar_ditebak = set()
+    st.session_state.show_pembahasan_langkah5 = False # State baru untuk pembahasan Langkah 5
 
 # ---------------------------- LANGKAH 1 ----------------------------
 st.header("🟩 Langkah 1: Masukkan Titik-titik")
@@ -104,7 +105,7 @@ if st.session_state.langkah >= 2:
     st.markdown("Masukkan **nilai x dan y** yang kamu tebak. Sistem akan mencocokkan dengan fungsi yang tersembunyi.")
     col1, col2 = st.columns(2)
     with col1:
-        x_manual = st.number_input("Tebak nilai x:", min_value=-2, max_value=7, key="manual_x")
+        x_manual = st.number_input("Tebak nilai x:", min_value=-2, max_value=7, step=1, key="manual_x")
     with col2:
         y_manual = st.text_input("Tebak nilai y:", key="manual_y")
 
@@ -118,7 +119,7 @@ if st.session_state.langkah >= 2:
                 if y_manual_val == y_benar:
                     st.success("✅ Benar")
                     st.session_state.input_manual.append((x_manual, y_manual_val, "✅ Benar"))
-                    st.session_state.x_benar_ditebak.add(x_manual) # Tambahkan x ke set jika benar
+                    st.session_state.x_benar_ditebak.add(x_manual)
                 else:
                     st.error("❌ Salah")
                     st.session_state.input_manual.append((x_manual, y_manual_val, "❌ Salah"))
@@ -132,15 +133,22 @@ if st.session_state.langkah >= 2:
         df2.index = df2.index + 1
         st.dataframe(df2)
 
-        # Hitung jumlah tebakan benar yang unik berdasarkan x
         unique_correct_x = set(row[0] for row in st.session_state.input_manual if row[2] == "✅ Benar")
         if len(unique_correct_x) >= 3:
             if st.button("➡ Lanjut ke Langkah 3"):
                 st.session_state.langkah = 3
                 # Ambil 3 titik benar terakhir yang unik
-                st.session_state.tiga_titik = [row for row in st.session_state.input_manual if row[2] == "✅ Benar"][-3:]
-                # Pastikan tiga titik ini unik, meskipun logikanya sudah mencegah duplikasi x
-                st.session_state.tiga_titik = list({(x, y, status) for x, y, status in st.session_state.tiga_titik})
+                st.session_state.tiga_titik = list(unique_correct_x)[:3] # Ambil 3 nilai x unik yang benar
+                # Re-map ke bentuk (x,y,status) lengkap dari data_titik atau input_manual jika perlu
+                # Untuk kesederhanaan, mari kita asumsikan tiga titik ini sudah valid dari input_manual
+                # Kita perlu memastikan st.session_state.tiga_titik berisi (x,y,status) yang valid
+                valid_three_points = []
+                for x_val in list(unique_correct_x)[:3]:
+                    for item in st.session_state.input_manual:
+                        if item[0] == x_val and item[2] == "✅ Benar":
+                            valid_three_points.append(item)
+                            break # Ambil yang pertama ditemukan jika ada duplikat dalam input_manual
+                st.session_state.tiga_titik = valid_three_points
                 st.rerun()
 
 # ---------------------------- LANGKAH 3 ----------------------------
@@ -187,7 +195,7 @@ if st.session_state.langkah >= 3:
 
         fig_quad, ax_quad = plt.subplots()
         ax_quad.plot(x_plot, y_plot, color='blue', label='$y = x^2 - 6x + 7$')
-        ax_quad.scatter([x for x,_,_ in st.session_state.tiga_titik], [y for x,y,_ in st.session_state.tiga_titik], color='red', zorder=5, label='Titik yang Digunakan')
+        ax_quad.scatter([x for x,y,s in st.session_state.tiga_titik], [y for x,y,s in st.session_state.tiga_titik], color='red', zorder=5, label='Titik yang Digunakan')
         ax_quad.set_title("Grafik Fungsi Kuadrat")
         ax_quad.set_xlabel("x")
         ax_quad.set_ylabel("y")
@@ -211,6 +219,8 @@ if st.session_state.langkah >= 4:
     if st.button("Cek Pilihan Fungsi"):
         st.session_state.fungsi_tersisa = [f for f in fungsi_latex if f != st.session_state.tebakan_fungsi]
         st.session_state.langkah = 5
+        # Reset state pembahasan saat pindah langkah
+        st.session_state.show_pembahasan_langkah5 = False 
         st.rerun()
 
 # ---------------------------- LANGKAH 5 ----------------------------
@@ -228,50 +238,59 @@ if st.session_state.langkah >= 5:
         "(x + 1)(x - 5)",
         "(x - 2)^2"
     ]
-    random.shuffle(opsi_faktorisasi) # Randomize the order
+    random.shuffle(opsi_faktorisasi)
 
     pilihan = st.radio("Pilih faktorisasi yang benar:", opsi_faktorisasi)
     if st.button("Cek Faktorisasi"):
         if pilihan == faktorisasi_dict[kode][0]:
-            st.success("✅ Benar! Mari kita bahas pembahasannya:")
-            st.markdown(f"""
-            Untuk memfaktorkan fungsi kuadrat $y = {fungsi_latex[kode].split('=')[1]}$, kita perlu mencari **dua bilangan** yang memenuhi dua kondisi:
-            1.  Jika kedua bilangan tersebut **dikalikan**, hasilnya harus sama dengan nilai **konstanta** (istilah 'c' dalam $ax^2 + bx + c$).
-            2.  Jika kedua bilangan tersebut **dijumlahkan**, hasilnya harus sama dengan nilai **koefisien dari x** (istilah 'b' dalam $ax^2 + bx + c$).
-
-            Untuk **Fungsi {kode}**:
-            """)
-            if kode == "Fungsi 1":
-                st.markdown(r"""
-                Fungsi yang dipilih adalah $y = x^2 - 6x + 7$.
-                Kita mencari dua bilangan yang jika dikalikan hasilnya 7 dan jika dijumlahkan hasilnya -6.
-                Bilangan tersebut adalah **-2 dan -4**.
-                Karena $(-2) \times (-4) = 8$ dan $(-2) + (-4) = -6$.
-                Jadi, faktorisasinya adalah **$(x - 2)(x - 4)$**.
-                """)
-            elif kode == "Fungsi 2":
-                st.markdown(r"""
-                Fungsi yang dipilih adalah $y = x^2 - 5x + 6$.
-                Kita mencari dua bilangan yang jika dikalikan hasilnya 6 dan jika dijumlahkan hasilnya -5.
-                Bilangan tersebut adalah **-2 dan -3**.
-                Karena $(-2) \times (-3) = 6$ dan $(-2) + (-3) = -5$.
-                Jadi, faktorisasinya adalah **$(x - 2)(x - 3)$**.
-                """)
-            elif kode == "Fungsi 3":
-                st.markdown(r"""
-                Fungsi yang dipilih adalah $y = x^2 - 4x + 3$.
-                Kita mencari dua bilangan yang jika dikalikan hasilnya 3 dan jika dijumlahkan hasilnya -4.
-                Bilangan tersebut adalah **-1 dan -3**.
-                Karena $(-1) \times (-3) = 3$ dan $(-1) + (-3) = -4$.
-                Jadi, faktorisasinya adalah **$(x - 1)(x - 3)$**.
-                """)
-            st.session_state.langkah = 6
-            st.rerun()
+            st.success("✅ Benar!")
+            st.session_state.show_pembahasan_langkah5 = True # Set state untuk menampilkan pembahasan
         else:
             st.session_state.salah_faktorisasi += 1
             st.error("❌ Masih salah")
+            st.session_state.show_pembahasan_langkah5 = False # Sembunyikan pembahasan jika salah
             if st.session_state.salah_faktorisasi >= 3:
                 st.info("Hint: Perhatikan koefisien tengah dan konstanta. Ingat, $(x-p)(x-q) = x^2 - (p+q)x + pq$.")
+
+    if st.session_state.show_pembahasan_langkah5:
+        st.subheader("💡 Pembahasan Lengkap:")
+        st.markdown(f"""
+        Untuk memfaktorkan fungsi kuadrat $y = {fungsi_latex[kode].split('=')[1]}$, kita perlu mencari **dua bilangan** yang memenuhi dua kondisi:
+        1.  Jika kedua bilangan tersebut **dikalikan**, hasilnya harus sama dengan nilai **konstanta** (istilah 'c' dalam $ax^2 + bx + c$).
+        2.  Jika kedua bilangan tersebut **dijumlahkan**, hasilnya harus sama dengan nilai **koefisien dari x** (istilah 'b' dalam $ax^2 + bx + c$).
+
+        Untuk **Fungsi {kode}**:
+        """)
+        if kode == "Fungsi 1":
+            st.markdown(r"""
+            Fungsi yang dipilih adalah $y = x^2 - 6x + 7$.
+            Kita mencari dua bilangan yang jika dikalikan hasilnya 7 dan jika dijumlahkan hasilnya -6.
+            Bilangan tersebut adalah **-2 dan -4**.
+            Karena $(-2) \times (-4) = 8$ dan $(-2) + (-4) = -6$.
+            Jadi, faktorisasinya adalah **$(x - 2)(x - 4)$**.
+            """)
+        elif kode == "Fungsi 2":
+            st.markdown(r"""
+            Fungsi yang dipilih adalah $y = x^2 - 5x + 6$.
+            Kita mencari dua bilangan yang jika dikalikan hasilnya 6 dan jika dijumlahkan hasilnya -5.
+            Bilangan tersebut adalah **-2 dan -3**.
+            Karena $(-2) \times (-3) = 6$ dan $(-2) + (-3) = -5$.
+            Jadi, faktorisasinya adalah **$(x - 2)(x - 3)$**.
+            """)
+        elif kode == "Fungsi 3":
+            st.markdown(r"""
+            Fungsi yang dipilih adalah $y = x^2 - 4x + 3$.
+            Kita mencari dua bilangan yang jika dikalikan hasilnya 3 dan jika dijumlahkan hasilnya -4.
+            Bilangan tersebut adalah **-1 dan -3**.
+            Karena $(-1) \times (-3) = 3$ dan $(-1) + (-3) = -4$.
+            Jadi, faktorisasinya adalah **$(x - 1)(x - 3)$**.
+            """)
+        
+        # Tambahkan tombol Lanjut setelah pembahasan muncul
+        if st.button("➡ Lanjut ke Langkah 6"):
+            st.session_state.langkah = 6
+            st.rerun()
+
 
 # ---------------------------- LANGKAH 6 ----------------------------
 if st.session_state.langkah >= 6:
@@ -281,9 +300,11 @@ if st.session_state.langkah >= 6:
         st.latex(fungsi_latex[fungsi_sisa])
         col1, col2 = st.columns(2)
         with col1:
-            x1 = st.number_input(f"x₁ untuk {fungsi_sisa}", key=f"x1_{fungsi_sisa}")
+            # Menggunakan step=1 untuk memastikan input bilangan bulat
+            x1 = st.number_input(f"x₁ untuk {fungsi_sisa}", key=f"x1_{fungsi_sisa}", step=1)
         with col2:
-            x2 = st.number_input(f"x₂ untuk {fungsi_sisa}", key=f"x2_{fungsi_sisa}")
+            # Menggunakan step=1 untuk memastikan input bilangan bulat
+            x2 = st.number_input(f"x₂ untuk {fungsi_sisa}", key=f"x2_{fungsi_sisa}", step=1)
 
         if st.button(f"Cek Akar {fungsi_sisa}"):
             benar_x1 = faktorisasi_dict[fungsi_sisa][1]
