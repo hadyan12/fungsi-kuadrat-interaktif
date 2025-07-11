@@ -1,162 +1,169 @@
-import streamlit as st
-import matplotlib.pyplot as plt
+st.set_page_config(page_title="Temukan Rumus Fungsi Kuadrat", page_icon="📐")
+st.title("📐 Temukan Sendiri Rumus Fungsi Kuadrat!")
 
-def f(x):
-    return x**2 + 2*x + 1
-
-st.set_page_config(page_title="Belajar Fungsi Kuadrat", page_icon="🎓")
-st.title("🎓 Interaktif Belajar Fungsi Kuadrat: f(x) = x² + 2x + 1")
-
-# Header edukatif
 st.markdown("""
-Selamat datang di **modul belajar fungsi matematika interaktif**!  
-Di sini kamu akan belajar bagaimana sebuah **fungsi mengubah input menjadi output**, dengan cara yang menyenangkan dan praktis.
+Hai, selamat datang di *ruang eksplorasi fungsi kuadrat!*
+
+Hari ini kamu *bukan cuma belajar* seperti biasa.  
+Kamu akan *menjadi peneliti matematika*: mencoba beberapa nilai, mengamati hasilnya, dan...  
+🤔 *menebak sendiri rumus* fungsi yang tersembunyi di balik angka-angka itu.
 
 ---
 
-## 🔍 Apa yang akan kamu lakukan?
+## 🧩 Apa yang akan kamu lakukan?
 
-✅ Menjelajahi fungsi kuadrat: `f(x) = x² + 2x + 1`  
-✅ Memasukkan nilai **x**, lalu melihat bagaimana fungsi bekerja langkah demi langkah  
-✅ **Menguji pemahamanmu** dengan menghitung sendiri dan mencocokkan hasilnya  
-✅ Melihat **grafik fungsi** untuk memahami bentuk visual dari f(x)
+🔍 Melakukan *percobaan nilai x* dan melihat bagaimana hasil f(x) terbentuk  
+📊 Mencatat data dalam bentuk tabel dan grafik  
+🧠 Mencoba *menebak bentuk rumus* kuadrat dari pola data  
+🧪 Menguji tebakanmu — apakah cocok dengan semua titik?  
+🏁 Lalu akhirnya... mengubah rumus itu ke *bentuk kuadrat sempurna*
 
 ---
 
 ## 🎯 Tujuan Pembelajaran
 
-- Memahami konsep **fungsi kuadrat sederhana**
-- Menjelaskan proses evaluasi fungsi untuk berbagai nilai x
-- Meningkatkan keterampilan berpikir logis dan mandiri
+- Melatih kemampuan *menganalisis pola* dari data
+- Memahami *struktur fungsi kuadrat*
+- Meningkatkan *logika berpikir mandiri*, bukan hanya hafalan rumus
+- Membentuk *pemahaman yang lebih dalam* melalui eksplorasi
+
+---
+
+💡 *Tips dari Pembimbing:*
+> Jangan takut salah! Justru dari kesalahan kamu akan lebih cepat paham.  
+> Coba minimal 3–5 nilai x, amati hasilnya, lalu buat dugaan yang masuk akal.  
+> Kita belajar *dengan cara yang dilakukan para ilmuwan!*
+
+Selamat bereksperimen dan semangat menemukan sendiri! 🎓
 """)
 
-# Inisialisasi session state
-if "percobaan" not in st.session_state:
-    st.session_state.percobaan = 0
-    st.session_state.riwayat_x = []
-    st.session_state.riwayat_fx = []
-    st.session_state.step1_done = False
-    st.session_state.step2_done = False
-    st.session_state.jumlah_salah = 0
-    st.session_state.x2_benar = False
-    st.session_state.show_bantuan = False
+import streamlit as st
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Langkah 1 - Eksplorasi
-with st.expander("\U0001F4D8 Langkah 1: Eksplorasi Fungsi", expanded=True):
-    max_percobaan = 3
-    sisa = max_percobaan - st.session_state.percobaan
+def fungsi_asli(x):
+    # INI RAHASIA (bisa diganti a, b, c sesukamu)
+    return 2 * x**2 + 3 * x + 1
 
-    if not st.session_state.step1_done:
-        if sisa > 0:
-            st.info(f"💡 Kamu punya {sisa} kesempatan lagi untuk mencoba nilai x.")
-            st.write("Masukkan nilai x dan tekan tombol **Lihat hasil** untuk melihat bagaimana fungsi bekerja.")
+st.set_page_config(page_title="Menemukan Rumus Fungsi Kuadrat", page_icon="📐")
+st.title("📐 Temukan Sendiri Rumus Fungsi Kuadrat")
 
-            current_try = st.session_state.percobaan
-            key_prefix = f"percobaan_{current_try}"
+st.markdown("""
+Modul ini dirancang untuk mengajakmu *menemukan sendiri* bentuk fungsi kuadrat melalui percobaan nilai.
 
-            if f"{key_prefix}_show_result" not in st.session_state:
-                st.session_state[f"{key_prefix}_show_result"] = False
-            if f"{key_prefix}_x_final" not in st.session_state:
-                st.session_state[f"{key_prefix}_x_final"] = None
+---
 
-            if not st.session_state[f"{key_prefix}_show_result"]:
-                x = st.number_input(
-                    f"Percobaan ke-{current_try + 1}: Masukkan nilai x (1–10):",
-                    min_value=1, max_value=10, step=1,
-                    key=f"{key_prefix}_x"
-                )
+## 🎯 Tujuan Pembelajaran
 
-                if st.button("\U0001F4E5 Lihat hasil", key=f"{key_prefix}_lihat"):
-                    st.session_state[f"{key_prefix}_x_final"] = x
-                    st.session_state[f"{key_prefix}_show_result"] = True
+- Mengamati pola dari data input-output
+- Menemukan rumus fungsi kuadrat berdasarkan data
+- Menguji dugaan rumus terhadap titik-titik baru
+- Mengubah ke bentuk kuadrat sempurna *setelah menemukan sendiri bentuk umum*
 
-            if st.session_state[f"{key_prefix}_show_result"]:
-                x = st.session_state[f"{key_prefix}_x_final"]
-                fx = f(x)
-                st.info(f"Percobaan ke-{current_try + 1}, nilai x = {x}")
-                st.markdown(f"""
-                - $x^2$ = {x}² = {x**2}  
-                - $2x$ = (2×{x}) = {2*x}  
-                - Jumlah: {x**2} + ({2*x}) + 1 = {fx}  
-                ✅ Maka $f({x}) = {fx}$
-                """)
+""")
 
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("🔁 Coba nilai lain", key=f"{key_prefix}_lanjut"):
-                        if x not in st.session_state.riwayat_x:
-                            st.session_state.riwayat_x.append(x)
-                            st.session_state.riwayat_fx.append(fx)
-                        st.session_state.percobaan += 1
-                        st.rerun()
+# Session state
+if "x_list" not in st.session_state:
+    st.session_state.x_list = []
+    st.session_state.fx_list = []
+    st.session_state.tebakan_siswa = ""
+    st.session_state.langkah_2 = False
+    st.session_state.langkah_3 = False
+    st.session_state.cocok = False
 
-                with col2:
-                    if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
-                        if x not in st.session_state.riwayat_x:
-                            st.session_state.riwayat_x.append(x)
-                            st.session_state.riwayat_fx.append(fx)
-                        st.session_state.step1_done = True
-                        st.rerun()
+### LANGKAH 1 - EKSPERIMEN NILAI x
+with st.expander("🔍 Langkah 1: Eksperimen Nilai x", expanded=not st.session_state.langkah_2):
+    st.write("Masukkan nilai x (boleh negatif atau positif), lalu lihat hasil f(x).")
+    x = st.number_input("Masukkan nilai x:", value=1, step=1, key="x_input")
+    if st.button("➕ Tambahkan ke tabel", key="add_x"):
+        if x not in st.session_state.x_list:
+            st.session_state.x_list.append(x)
+            st.session_state.fx_list.append(fungsi_asli(x))
         else:
-            st.info("⚠️ Kamu sudah melakukan 3 percobaan. Lanjut ke langkah berikutnya.")
-            st.session_state.step1_done = True
-            st.rerun()
+            st.warning("Nilai x ini sudah pernah dicoba.")
 
-    # Riwayat nilai tetap ditampilkan
-    if st.session_state.riwayat_x:
-        st.write("📌 Riwayat nilai x:")
-        for i, x_val in enumerate(st.session_state.riwayat_x):
-            st.markdown(f"- $f({x_val}) = {st.session_state.riwayat_fx[i]}$")
+    if st.session_state.x_list:
+        st.write("📋 Data percobaan kamu:")
+        data = {
+            "x": st.session_state.x_list,
+            "f(x)": st.session_state.fx_list
+        }
+        st.table(data)
 
-# Langkah 2 - Uji Pemahaman
-if st.session_state.step1_done and not st.session_state.step2_done:
-    with st.expander("📗 Langkah 2: Uji Pemahaman", expanded=True):
-        st.write("Sekarang coba hitung **sendiri**, pakai nilai x yang **belum dipakai sebelumnya**.")
-
-        x2_input = st.number_input("Masukkan nilai x baru:", min_value=1, max_value=10, step=1, key="x2_input")
-        if x2_input in st.session_state.riwayat_x:
-            st.warning("⚠️ Nilai ini sudah digunakan. Coba nilai lain.")
-        else:
-            st.latex(f"f({x2_input}) = {x2_input}^2 + (2\\times{x2_input}) + 1 = ?")
-            jawaban = st.number_input("Masukkan hasil perhitunganmu:", step=1, key="jawaban_input")
-
-            if st.button("Cek Jawaban", key="cekjawaban"):
-                if jawaban == f(x2_input):
-                    st.success("✅ Jawabanmu benar! Kamu hebat.")
-                    st.session_state.step2_done = True
-                    st.session_state.x2_benar = True
-                else:
-                    st.session_state.jumlah_salah += 1
-                    sisa = 3 - st.session_state.jumlah_salah
-                    if sisa > 0:
-                        st.error(f"❌ Masih belum tepat. Coba lagi ya. ({sisa} kesempatan lagi)")
-                    else:
-                        st.session_state.show_bantuan = True
-
-        if st.session_state.show_bantuan:
-            st.warning("🧠 Sudah 3 kali salah. Yuk kita bantu bareng, kamu tetap yang hitung:")
-            kuadrat = st.number_input(f"Langkah 1: Hitung {x2_input}² =", step=1, key="kuadrat_bantu")
-            kali_dua = st.number_input(f"Langkah 2: Hitung (2 × {x2_input}) =", step=1, key="kali2_bantu")
-            total = st.number_input(f"Langkah 3: Hitung {kuadrat} + {kali_dua} + 1 =", step=1, key="total_bantu")
-
-            if kuadrat == x2_input**2 and kali_dua == 2 * x2_input and total == f(x2_input):
-                st.success(f"✅ Betul! Maka f({x2_input}) = {total}")
-                st.session_state.step2_done = True
-                st.session_state.x2_benar = True
-            else:
-                st.info("🔁 Cek kembali perhitunganmu ya!")
-
-# Langkah 3 - Visualisasi
-if st.session_state.step2_done and st.session_state.x2_benar:
-    with st.expander("📊 Langkah 3: Visualisasi Grafik"):
-        x_vals = list(range(-11, 11))
-        y_vals = [f(x) for x in x_vals]
-
-        fig, ax = plt.subplots(figsize=(8, 5))
-        ax.plot(x_vals, y_vals, marker='o', color='blue')
-        ax.set_title("Grafik Fungsi f(x) = x² + 2x + 1")
+        # Grafik titik-titik
+        fig, ax = plt.subplots()
+        ax.scatter(st.session_state.x_list, st.session_state.fx_list, color='blue', label='Titik f(x)')
+        ax.set_title("Plot Titik (x, f(x))")
         ax.set_xlabel("x")
         ax.set_ylabel("f(x)")
         ax.grid(True)
+        st.pyplot(fig)
 
+        if len(st.session_state.x_list) >= 3:
+            if st.button("➡ Lanjut ke Tebak Rumus", key="next_tebakan"):
+                st.session_state.langkah_2 = True
+                st.rerun()
+
+### LANGKAH 2 - TEBAK RUMUS
+if st.session_state.langkah_2 and not st.session_state.langkah_3:
+    with st.expander("✏ Langkah 2: Tebak Rumus", expanded=True):
+        st.markdown("""
+        Dari data percobaanmu, coba tebak rumus fungsi kuadrat dalam bentuk:
+        \[
+        f(x) = ax^2 + bx + c
+        \]
+        Masukkan nilai dugaanmu untuk a, b, dan c:
+        """)
+        a_tebak = st.number_input("Tebakan koefisien a:", value=1, step=1, key="a_tebak")
+        b_tebak = st.number_input("Tebakan koefisien b:", value=1, step=1, key="b_tebak")
+        c_tebak = st.number_input("Tebakan konstanta c:", value=0, step=1, key="c_tebak")
+
+        def fungsi_tebakan(x): return a_tebak * x**2 + b_tebak * x + c_tebak
+
+        if st.button("🔍 Cek Kecocokan", key="cek_rumus"):
+            cocok = True
+            for x, fx in zip(st.session_state.x_list, st.session_state.fx_list):
+                if fungsi_tebakan(x) != fx:
+                    cocok = False
+                    break
+            if cocok:
+                st.success("✅ Tebakanmu benar! Selamat, kamu telah menemukan rumus f(x)!")
+                st.session_state.langkah_3 = True
+                st.session_state.cocok = True
+            else:
+                st.error("❌ Masih ada yang belum cocok. Coba perbaiki tebakanmu.")
+
+### LANGKAH 3 - KUADRAT SEMPURNA
+if st.session_state.langkah_3 and st.session_state.cocok:
+    with st.expander("🧠 Langkah 3: Bentuk Kuadrat Sempurna", expanded=True):
+        a = a_tebak
+        b = b_tebak
+        c = c_tebak
+
+        h = -b / (2 * a)
+        k = c - (b**2) / (4 * a)
+
+        st.markdown("""
+        Dari rumus umum yang kamu temukan:
+        """)
+        st.latex(f"f(x) = {a}x^2 + {b}x + {c}")
+
+        st.markdown("Kita ubah ke bentuk kuadrat sempurna:")
+        st.latex(
+            r"f(x) = a(x - h)^2 + k" + f" = {a}(x {h:+.2f})² + {k:.2f}"
+        )
+        st.success(f"Jadi: f(x) = {a}(x {h:+.2f})² + {k:.2f}")
+
+        # Grafik akhir
+        st.subheader("📊 Grafik Lengkap Fungsi")
+        x_vals = np.linspace(h - 10, h + 10, 400)
+        y_vals = fungsi_asli(x_vals)
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        ax.plot(x_vals, y_vals, label="f(x)", color="blue")
+        ax.axvline(h, color="red", linestyle="--", label="Sumbu Simetri")
+        ax.plot(h, k, "ro", label="Titik Puncak")
+        ax.scatter(st.session_state.x_list, st.session_state.fx_list, color="green", label="Titik Data")
+        ax.legend()
+        ax.grid(True)
         st.pyplot(fig)
