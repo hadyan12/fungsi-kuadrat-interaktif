@@ -156,8 +156,15 @@ if st.session_state.langkah >= 3:
         st.latex(f"({x}, {y})")
 
     st.markdown("### Substitusi ke $y = ax^2 + bx + c$:")
+    st.markdown("Berikut adalah persamaan yang terbentuk dari setiap titik:")
+    st.write("") # Memberikan spasi kosong
     for x, y, *_ in titik:
         st.latex(f"{y} = a({x})^2 + b({x}) + c")
+        st.write("") # Memberikan spasi kosong setelah setiap persamaan
+
+    st.markdown("Sekarang, coba eliminasi dan substitusi persamaan-persamaan ini untuk menemukan nilai a, b, dan c.")
+    st.write("") # Memberikan spasi kosong
+    st.markdown("Tuliskan hasilnya di bawah ini:")
 
     if not st.session_state.sudah_eliminasi:
         if st.button("✍️ Saya sudah eliminasi"):
@@ -233,9 +240,9 @@ if st.session_state.langkah >= 5:
     
     opsi_faktorisasi = [
         faktorisasi_dict[kode][0],
-        "(x + 1)(x - 7)", # Ganti opsi agar tidak sama dengan kasus lain
-        "(x - 5)(x - 2)", # Ganti opsi agar tidak sama dengan kasus lain
-        "(x + 3)(x - 1)", # Ganti opsi agar tidak sama dengan kasus lain
+        "(x + 1)(x - 7)",
+        "(x - 5)(x - 2)",
+        "(x + 3)(x - 1)",
         "(x - 2)^2"
     ]
     random.shuffle(opsi_faktorisasi)
@@ -256,7 +263,7 @@ if st.session_state.langkah >= 5:
         st.subheader("💡 Pembahasan Lengkap Metode Faktorisasi:")
         st.markdown(f"""
         Untuk memfaktorkan fungsi kuadrat dalam bentuk umum $ax^2 + bx + c$, terutama ketika $a=1$ (seperti fungsi ini), kita mencari dua bilangan ($p$ dan $q$) yang memenuhi dua kondisi penting:
-        1.  **Hasil Kali (Produk) $p \times q = c$**: Kedua bilangan tersebut jika dikalikan harus menghasilkan nilai **konstanta** ($c$).
+        1.  **Hasil Kali (Produk) $p \\times q = c$**: Kedua bilangan tersebut jika dikalikan harus menghasilkan nilai **konstanta** ($c$).
         2.  **Hasil Jumlah (Sum) $p + q = b$**: Kedua bilangan tersebut jika dijumlahkan harus menghasilkan nilai **koefisien dari $x$** ($b$).
 
         Setelah menemukan $p$ dan $q$, bentuk faktorisasinya akan menjadi $(x - p)(x - q)$.
@@ -271,19 +278,24 @@ if st.session_state.langkah >= 5:
         if kode == "Fungsi 1": # y = x^2 - 6x + 8
             b_val = -6
             c_val = 8
-            # Bilangan yang dicari adalah -p_val dan -q_val
             bil_1 = -2
             bil_2 = -4
+            pasangan_kali = ["$1 \\times 8 = 8$", "$-1 \\times -8 = 8$", "$2 \\times 4 = 8$", "$-2 \\times -4 = 8$"]
+            pasangan_jumlah = ["$1 + 8 = 9$", "$-1 + (-8) = -9$", "$2 + 4 = 6$", "$\\boxed{{{bil_1} + {bil_2} = {b_val}}}$"]
         elif kode == "Fungsi 2": # y = x^2 - 5x + 6
             b_val = -5
             c_val = 6
             bil_1 = -2
             bil_2 = -3
+            pasangan_kali = ["$1 \\times 6 = 6$", "$-1 \\times -6 = 6$", "$2 \\times 3 = 6$", "$-2 \\times -3 = 6$"]
+            pasangan_jumlah = ["$1 + 6 = 7$", "$-1 + (-6) = -7$", "$2 + 3 = 5$", "$\\boxed{{{bil_1} + {bil_2} = {b_val}}}$"]
         elif kode == "Fungsi 3": # y = x^2 - 4x + 3
             b_val = -4
             c_val = 3
             bil_1 = -1
             bil_2 = -3
+            pasangan_kali = ["$1 \\times 3 = 3$", "$-1 \\times -3 = 3$"]
+            pasangan_jumlah = ["$1 + 3 = 4$", "$\\boxed{{{bil_1} + {bil_2} = {b_val}}}$"]
         
         st.markdown(f"""
         Fungsi yang kita faktorkan adalah: ${fungsi_latex[kode].split('=')[1]}$
@@ -292,65 +304,23 @@ if st.session_state.langkah >= 5:
         **Langkah 1: Cari pasangan bilangan yang hasil kalinya $c$ ($c = {c_val}$)**
         """)
         
-        if kode == "Fungsi 1":
-            st.markdown(f"""
-            Kita cari dua bilangan yang jika dikalikan menghasilkan $8$. Beberapa kemungkinannya adalah:
-            * $1 \times 8 = 8$
-            * $-1 \times -8 = 8$
-            * $2 \times 4 = 8$
-            * $-2 \times -4 = 8$
-            """)
-        elif kode == "Fungsi 2":
-            st.markdown(f"""
-            Kita cari dua bilangan yang jika dikalikan menghasilkan $6$. Beberapa kemungkinannya adalah:
-            * $1 \times 6 = 6$
-            * $-1 \times -6 = 6$
-            * $2 \times 3 = 6$
-            * $-2 \times -3 = 6$
-            """)
-        elif kode == "Fungsi 3":
-            st.markdown(f"""
-            Kita cari dua bilangan yang jika dikalikan menghasilkan $3$. Beberapa kemungkinannya adalah:
-            * $1 \times 3 = 3$
-            * $-1 \times -3 = 3$
-            """)
+        for pasangan in pasangan_kali:
+            st.markdown(f"* {pasangan}")
 
         st.markdown(f"""
         **Langkah 2: Dari pasangan tersebut, cari yang hasil jumlahnya $b$ ($b = {b_val}$)**
         """)
 
-        # Perbaikan SyntaxError: Hapus satu backslash dari \\boxed
-        if kode == "Fungsi 1":
-            st.markdown(f"""
-            Sekarang, mari kita jumlahkan pasangan-pasangan di atas untuk melihat mana yang hasilnya $-6$:
-            * $1 + 8 = 9$ (bukan)
-            * $-1 + (-8) = -9$ (bukan)
-            * $2 + 4 = 6$ (bukan)
-            * $\\boxed{{{bil_1} + {bil_2} = {b_val}}}$ (cocok!)
-
-            Kita menemukan bilangan tersebut adalah **{bil_1} dan {bil_2}**.
-            """)
-        elif kode == "Fungsi 2":
-            st.markdown(f"""
-            Sekarang, mari kita jumlahkan pasangan-pasangan di atas untuk melihat mana yang hasilnya $-5$:
-            * $1 + 6 = 7$ (bukan)
-            * $-1 + (-6) = -7$ (bukan)
-            * $\\boxed{{{bil_1} + {bil_2} = {b_val}}}$ (cocok!)
-
-            Kita menemukan bilangan tersebut adalah **{bil_1} dan {bil_2}**.
-            """)
-        elif kode == "Fungsi 3":
-            st.markdown(f"""
-            Sekarang, mari kita jumlahkan pasangan-pasangan di atas untuk melihat mana yang hasilnya $-4$:
-            * $1 + 3 = 4$ (bukan)
-            * $\\boxed{{{bil_1} + {bil_2} = {b_val}}}$ (cocok!)
-
-            Kita menemukan bilangan tersebut adalah **{bil_1} dan {bil_2}**.
-            """)
+        for pasangan in pasangan_jumlah:
+            st.markdown(f"* {pasangan}")
 
         st.markdown(f"""
+        Kita menemukan bilangan tersebut adalah **{bil_1} dan {bil_2}**.
+
         **Langkah 3: Tuliskan dalam bentuk faktorisasi $(x - p)(x - q)$**
-        Karena bilangan yang kita temukan adalah ${bil_1}$ dan ${bil_2}$, maka kita bisa menuliskan ini sebagai:
+        Perhatikan bahwa jika bilangan yang kita temukan adalah $P$ dan $Q$, maka faktorisasinya adalah $(x - P)(x - Q)$.
+        Dalam kasus ini, bilangan yang kita temukan adalah ${bil_1}$ dan ${bil_2}$.
+        Maka, faktorisasinya adalah:
         $y = (x - ({bil_1}))(x - ({bil_2}))$
         Yang jika disederhanakan menjadi **$y = {faktorisasi_dict[kode][0]}$**
         """)
