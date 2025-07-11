@@ -55,6 +55,8 @@ if "data_titik" not in st.session_state:
     st.session_state.fungsi_tersisa = []
     st.session_state.salah_input_x1x2 = 0
     st.session_state.tiga_titik = []
+    st.session_state.grafik_benar_muncul = False
+    st.session_state.x_benar_ditebak = set() # Menambahkan set untuk menyimpan nilai x yang sudah ditebak benar
 
 # ---------------------------- LANGKAH 1 ----------------------------
 st.header("🟩 Langkah 1: Masukkan Titik-titik")
@@ -107,14 +109,22 @@ if st.session_state.langkah >= 2:
         y_manual = st.text_input("Tebak nilai y:", key="manual_y")
 
     if st.button("Cek Tebakan"):
-        try:
-            y_manual_val = int(y_manual)
-            y_benar = fungsi_rahasia(x_manual)
-            hasil = "✅ Benar" if y_manual_val == y_benar else "❌ Salah"
-            st.session_state.input_manual.append((x_manual, y_manual_val, hasil))
-        except ValueError: # Catch ValueError specifically for non-integer input
-            st.session_state.input_manual.append((x_manual, y_manual, "⚠ Input tidak valid"))
-            st.error("Masukkan harus berupa bilangan bulat untuk y.") # Moved error message here
+        if x_manual in st.session_state.x_benar_ditebak:
+            st.warning(f"Anda sudah menebak dengan benar untuk x = {x_manual}. Silakan coba nilai x yang lain.")
+        else:
+            try:
+                y_manual_val = int(y_manual)
+                y_benar = fungsi_rahasia(x_manual)
+                if y_manual_val == y_benar:
+                    st.success("✅ Benar")
+                    st.session_state.input_manual.append((x_manual, y_manual_val, "✅ Benar"))
+                    st.session_state.x_benar_ditebak.add(x_manual) # Tambahkan x ke set jika benar
+                else:
+                    st.error("❌ Salah")
+                    st.session_state.input_manual.append((x_manual, y_manual_val, "❌ Salah"))
+            except ValueError:
+                st.session_state.input_manual.append((x_manual, y_manual, "⚠ Input tidak valid"))
+                st.error("Masukkan harus berupa bilangan bulat untuk y.")
 
     if st.session_state.input_manual:
         st.write("### Tabel Hasil Tebakanmu")
@@ -122,11 +132,15 @@ if st.session_state.langkah >= 2:
         df2.index = df2.index + 1
         st.dataframe(df2)
 
-        benar_terakhir = [row for row in st.session_state.input_manual if row[2] == "✅ Benar"]
-        if len(benar_terakhir) >= 3:
+        # Hitung jumlah tebakan benar yang unik berdasarkan x
+        unique_correct_x = set(row[0] for row in st.session_state.input_manual if row[2] == "✅ Benar")
+        if len(unique_correct_x) >= 3:
             if st.button("➡ Lanjut ke Langkah 3"):
                 st.session_state.langkah = 3
-                st.session_state.tiga_titik = benar_terakhir[-3:]
+                # Ambil 3 titik benar terakhir yang unik
+                st.session_state.tiga_titik = [row for row in st.session_state.input_manual if row[2] == "✅ Benar"][-3:]
+                # Pastikan tiga titik ini unik, meskipun logikanya sudah mencegah duplikasi x
+                st.session_state.tiga_titik = list({(x, y, status) for x, y, status in st.session_state.tiga_titik})
                 st.rerun()
 
 # ---------------------------- LANGKAH 3 ----------------------------
@@ -139,7 +153,7 @@ if st.session_state.langkah >= 3:
 
     st.markdown("### Substitusi ke $y = ax^2 + bx + c$:")
     for x, y, *_ in titik:
-        st.latex(f"{y} = a({x})^2 + b({x}) + c") # Changed to use LaTeX for substitution
+        st.latex(f"{y} = a({x})^2 + b({x}) + c")
 
     if not st.session_state.sudah_eliminasi:
         if st.button("✍️ Saya sudah eliminasi"):
@@ -155,15 +169,37 @@ if st.session_state.langkah >= 3:
             try:
                 if int(a) == 1 and int(b) == -6 and int(c) == 7:
                     st.success("✅ Jawaban benar!")
-                    st.session_state.langkah = 4
-                    st.rerun()
+                    st.session_state.grafik_benar_muncul = True
                 else:
                     st.session_state.salah_tebakan_abc += 1
                     st.error("❌ Jawaban belum tepat")
                     if st.session_state.salah_tebakan_abc >= 3:
                         st.info("Hint: coba eliminasi ulang satu pasang persamaan saja terlebih dahulu.")
-            except ValueError: # Catch ValueError for non-integer input here too
+            except ValueError:
                 st.error("Masukkan a, b, dan c harus berupa bilangan bulat.")
+    
+    if st.session_state.grafik_benar_muncul:
+        st.subheader("🎉 Fungsi Kuadrat yang Ditemukan!")
+        st.latex("y = x^2 - 6x + 7")
+        
+        x_plot = np.linspace(-2, 7, 400)
+        y_plot = x_plot**2 - 6*x_plot + 7
+
+        fig_quad, ax_quad = plt.subplots()
+        ax_quad.plot(x_plot, y_plot, color='blue', label='$y = x^2 - 6x + 7$')
+        ax_quad.scatter([x for x,_,_ in st.session_state.tiga_titik], [y for x,y,_ in st.session_state.tiga_titik], color='red', zorder=5, label='Titik yang Digunakan')
+        ax_quad.set_title("Grafik Fungsi Kuadrat")
+        ax_quad.set_xlabel("x")
+        ax_quad.set_ylabel("y")
+        ax_quad.grid(True)
+        ax_quad.axhline(0, color='black',linewidth=0.5)
+        ax_quad.axvline(0, color='black',linewidth=0.5)
+        ax_quad.legend()
+        st.pyplot(fig_quad)
+
+        if st.button("➡ Lanjut ke Langkah 4"):
+            st.session_state.langkah = 4
+            st.rerun()
 
 # ---------------------------- LANGKAH 4 ----------------------------
 if st.session_state.langkah >= 4:
