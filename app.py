@@ -7,7 +7,7 @@ import random
 # ---------------------------- SETUP AWAL ----------------------------
 # Mengganti icon penggaris (📐) dengan icon grafik naik (📈)
 st.set_page_config(page_title="📈 Eksplorasi Fungsi Kuadrat", page_icon="📈")
-st.title("📈 Eksplorasi Mandiri Fungsi Kuadrat")
+st.title("📈 Eksplorasi Fungsi Kuadrat")
 
 # Mengurangi ukuran teks pembuka
 st.markdown("""
