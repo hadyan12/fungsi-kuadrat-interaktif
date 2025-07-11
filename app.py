@@ -35,7 +35,6 @@ if "percobaan" not in st.session_state:
     st.session_state.percobaan = 0
     st.session_state.riwayat_x = []
     st.session_state.riwayat_fx = []
-    st.session_state.lanjut = True
     st.session_state.step1_done = False
     st.session_state.step2_done = False
     st.session_state.jumlah_salah = 0
@@ -44,57 +43,66 @@ if "percobaan" not in st.session_state:
 
 # Langkah 1 - Eksplorasi
 with st.expander("\U0001F4D8 Langkah 1: Eksplorasi Fungsi", expanded=True):
+    max_percobaan = 3
+    sisa = max_percobaan - st.session_state.percobaan
+
     if not st.session_state.step1_done:
-        st.write("Masukkan nilai x dan tekan tombol **Lihat hasil** untuk melihat bagaimana fungsi bekerja.")
+        if sisa > 0:
+            st.info(f"💡 Kamu punya {sisa} kesempatan lagi untuk mencoba nilai x.")
+            st.write("Masukkan nilai x dan tekan tombol **Lihat hasil** untuk melihat bagaimana fungsi bekerja.")
 
-        current_try = st.session_state.percobaan
-        key_prefix = f"percobaan_{current_try}"
+            current_try = st.session_state.percobaan
+            key_prefix = f"percobaan_{current_try}"
 
-        if f"{key_prefix}_show_result" not in st.session_state:
-            st.session_state[f"{key_prefix}_show_result"] = False
-        if f"{key_prefix}_x_final" not in st.session_state:
-            st.session_state[f"{key_prefix}_x_final"] = None
+            if f"{key_prefix}_show_result" not in st.session_state:
+                st.session_state[f"{key_prefix}_show_result"] = False
+            if f"{key_prefix}_x_final" not in st.session_state:
+                st.session_state[f"{key_prefix}_x_final"] = None
 
-        if not st.session_state[f"{key_prefix}_show_result"]:
-            x = st.number_input(
-                f"Percobaan ke-{current_try + 1}: Masukkan nilai x (1–10):",
-                min_value=1, max_value=10, step=1,
-                key=f"{key_prefix}_x"
-            )
+            if not st.session_state[f"{key_prefix}_show_result"]:
+                x = st.number_input(
+                    f"Percobaan ke-{current_try + 1}: Masukkan nilai x (1–10):",
+                    min_value=1, max_value=10, step=1,
+                    key=f"{key_prefix}_x"
+                )
 
-            if st.button("\U0001F4E5 Lihat hasil", key=f"{key_prefix}_lihat"):
-                st.session_state[f"{key_prefix}_x_final"] = x
-                st.session_state[f"{key_prefix}_show_result"] = True
+                if st.button("\U0001F4E5 Lihat hasil", key=f"{key_prefix}_lihat"):
+                    st.session_state[f"{key_prefix}_x_final"] = x
+                    st.session_state[f"{key_prefix}_show_result"] = True
 
-        if st.session_state[f"{key_prefix}_show_result"]:
-            x = st.session_state[f"{key_prefix}_x_final"]
-            st.info(f"Percobaan ke-{current_try + 1}, nilai x = {x}")
-            fx = f(x)
-            st.markdown(f"""
-            - $x^2$ = {x}² = {x**2}  
-            - $2x$ = 2 × {x} = {2*x}  
-            - Jumlah: {x**2} + {2*x} + 1 = {fx}  
-            ✅ Maka $f({x}) = {fx}$
-            """)
+            if st.session_state[f"{key_prefix}_show_result"]:
+                x = st.session_state[f"{key_prefix}_x_final"]
+                fx = f(x)
+                st.info(f"Percobaan ke-{current_try + 1}, nilai x = {x}")
+                st.markdown(f"""
+                - $x^2$ = {x}² = {x**2}  
+                - $2x$ = 2 × {x} = {2*x}  
+                - Jumlah: {x**2} + {2*x} + 1 = {fx}  
+                ✅ Maka $f({x}) = {fx}$
+                """)
 
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("🔁 Coba nilai lain", key=f"{key_prefix}_lanjut"):
-                    if x not in st.session_state.riwayat_x:
-                        st.session_state.riwayat_x.append(x)
-                        st.session_state.riwayat_fx.append(fx)
-                    st.session_state.percobaan += 1
-                    st.rerun()
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🔁 Coba nilai lain", key=f"{key_prefix}_lanjut"):
+                        if x not in st.session_state.riwayat_x:
+                            st.session_state.riwayat_x.append(x)
+                            st.session_state.riwayat_fx.append(fx)
+                        st.session_state.percobaan += 1
+                        st.rerun()
 
-            with col2:
-                if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
-                    if x not in st.session_state.riwayat_x:
-                        st.session_state.riwayat_x.append(x)
-                        st.session_state.riwayat_fx.append(fx)
-                    st.session_state.step1_done = True
-                    st.rerun()
+                with col2:
+                    if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
+                        if x not in st.session_state.riwayat_x:
+                            st.session_state.riwayat_x.append(x)
+                            st.session_state.riwayat_fx.append(fx)
+                        st.session_state.step1_done = True
+                        st.rerun()
+        else:
+            st.info("⚠️ Kamu sudah melakukan 3 percobaan. Lanjut ke langkah berikutnya.")
+            st.session_state.step1_done = True
+            st.rerun()
 
-    # Tetap tampilkan riwayat meskipun step1 selesai
+    # Riwayat nilai tetap ditampilkan
     if st.session_state.riwayat_x:
         st.write("📌 Riwayat nilai x:")
         for i, x_val in enumerate(st.session_state.riwayat_x):
@@ -140,7 +148,7 @@ if st.session_state.step1_done and not st.session_state.step2_done:
 # Langkah 3 - Visualisasi
 if st.session_state.step2_done and st.session_state.x2_benar:
     with st.expander("📊 Langkah 3: Visualisasi Grafik"):
-        x_vals = list(range(-11, 11))
+        x_vals = list(range(1, 11))
         y_vals = [f(x) for x in x_vals]
 
         fig, ax = plt.subplots(figsize=(8, 5))
