@@ -43,12 +43,23 @@ if "percobaan" not in st.session_state:
 # Langkah 1 - Eksplorasi
 if not st.session_state.step1_done:
     with st.expander("📘 Langkah 1: Eksplorasi Fungsi", expanded=True):
-        st.write("Masukkan nilai x dan lihat cara kerja fungsi.")
+        st.write("Masukkan nilai x dan tekan tombol **Lihat hasil** untuk melihat bagaimana fungsi bekerja.")
 
-        x = st.number_input(f"Percobaan ke-{st.session_state.percobaan + 1}: Masukkan nilai x (1–10):",
-                            min_value=1, max_value=10, step=1, key=f"x{st.session_state.percobaan}")
+        # Inisialisasi status percobaan
+        current_try = st.session_state.percobaan
+        key_prefix = f"percobaan_{current_try}"
 
-        if x not in st.session_state.riwayat_x:
+        if f"{key_prefix}_show_result" not in st.session_state:
+            st.session_state[f"{key_prefix}_show_result"] = False
+
+        x = st.number_input(f"Percobaan ke-{current_try + 1}: Masukkan nilai x (1–10):",
+                            min_value=1, max_value=10, step=1, key=f"{key_prefix}_x")
+
+        if not st.session_state[f"{key_prefix}_show_result"]:
+            if st.button("📥 Lihat hasil", key=f"{key_prefix}_lihat"):
+                st.session_state[f"{key_prefix}_show_result"] = True
+
+        if st.session_state[f"{key_prefix}_show_result"]:
             st.markdown(f"""
             - x² = {x}² = {x**2}  
             - 2x = 2 × {x} = {2*x}  
@@ -56,21 +67,25 @@ if not st.session_state.step1_done:
             ✅ Maka f({x}) = **{f(x)}**
             """)
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("🔁 Coba nilai lain", key=f"btn_lanjut_{st.session_state.percobaan}"):
-                if x not in st.session_state.riwayat_x:
-                    st.session_state.riwayat_x.append(x)
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🔁 Coba nilai lain", key=f"{key_prefix}_lanjut"):
+                    if x not in st.session_state.riwayat_x:
+                        st.session_state.riwayat_x.append(x)
                     st.session_state.percobaan += 1
-                if st.session_state.percobaan >= 3:
+            with col2:
+                if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
+                    if x not in st.session_state.riwayat_x:
+                        st.session_state.riwayat_x.append(x)
                     st.session_state.step1_done = True
-        with col2:
-            if st.button("❌ Selesai", key="btn_selesai"):
-                if x not in st.session_state.riwayat_x:
-                    st.session_state.riwayat_x.append(x)
-                st.session_state.step1_done = True
 
-        st.write("📌 Riwayat nilai x:", st.session_state.riwayat_x)
+            st.write("📌 Riwayat nilai x:", st.session_state.riwayat_x)
+
+        # Batas otomatis
+        if st.session_state.percobaan >= 3:
+            st.info("⚠️ Sudah 3 kali mencoba.")
+            st.session_state.step1_done = True
+
 
 
 # Langkah 2 - Uji Pemahaman
