@@ -185,7 +185,7 @@ if st.session_state.langkah >= 5:
     st.latex(fungsi_latex[kode])
     st.markdown("Apa faktorisasi dari fungsi ini?")
 
-    pilihan = st.radio("Pilih faktorisasi yang benar:", [faktorisasi_dict[kode][0], "(x - 1)(x - 7)", "(x - 3)^2"])
+    pilihan = st.radio("Pilih faktorisasi yang benar:", [faktorisasi_dict[kode][0], "(x - 1)(x - 7)", "(x - 3)^2"], key="radio_faktorisasi")
 
     if st.button("Cek Faktorisasi"):
         if pilihan == faktorisasi_dict[kode][0]:
