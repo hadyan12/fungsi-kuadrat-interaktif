@@ -60,9 +60,12 @@ if not st.session_state.step1_done:
                 key=f"{key_prefix}_x"
             )
 
-            if st.button("📥 Lihat hasil", key=f"{key_prefix}_lihat"):
-                st.session_state[f"{key_prefix}_x_final"] = x
-                st.session_state[f"{key_prefix}_show_result"] = True
+            if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
+                if x not in st.session_state.riwayat_x:
+                    st.session_state.riwayat_x.append(x)
+                st.session_state.step1_done = True
+                st.experimental_rerun()  
+
 
         if st.session_state[f"{key_prefix}_show_result"]:
             x = st.session_state[f"{key_prefix}_x_final"]
