@@ -39,9 +39,9 @@ fungsi_latex = {
     "Fungsi 3": "y = x^{2} - 4x + 3"
 }
 faktorisasi_dict = {
-    "Fungsi 1": ["(x - 2)(x - 4)", 2, 4],
-    "Fungsi 2": ["(x - 2)(x - 3)", 2, 3],
-    "Fungsi 3": ["(x - 1)(x - 3)", 1, 3]
+    "Fungsi 1": ["(x - 2)(x - 4)", 2, 4], # Akar-akar positif 2 dan 4
+    "Fungsi 2": ["(x - 2)(x - 3)", 2, 3], # Akar-akar positif 2 dan 3
+    "Fungsi 3": ["(x - 1)(x - 3)", 1, 3] # Akar-akar positif 1 dan 3
 }
 
 if "data_titik" not in st.session_state:
@@ -171,7 +171,7 @@ if st.session_state.langkah >= 3:
         if st.button("Cek Jawaban Bentuk Umum"):
             st.session_state.tebakan_abc = {"a": a, "b": b, "c": c}
             try:
-                # Perbaikan: Sesuaikan nilai a, b, c dengan fungsi_rahasia yang baru (x^2 - 6x + 8)
+                # Nilai a, b, c yang benar untuk y = x^2 - 6x + 8
                 if int(a) == 1 and int(b) == -6 and int(c) == 8:
                     st.success("✅ Jawaban benar!")
                     st.session_state.grafik_benar_muncul = True
@@ -187,18 +187,16 @@ if st.session_state.langkah >= 3:
         st.subheader("🎉 Fungsi Kuadrat yang Ditemukan!")
         st.latex(fungsi_latex["Fungsi 1"])
         
-        # Rentang X yang lebih luas
-        x_plot = np.linspace(-5, 10, 400) # Diperlebar dari -2, 7 menjadi -5, 10
+        x_plot = np.linspace(-5, 10, 400)
         y_plot = fungsi_pilihan["Fungsi 1"](x_plot)
 
-        fig_quad, ax_quad = plt.subplots(figsize=(10, 6)) # Perbesar ukuran figur
+        fig_quad, ax_quad = plt.subplots(figsize=(10, 6))
         ax_quad.plot(x_plot, y_plot, color='blue', label=f'${fungsi_latex["Fungsi 1"].split("=")[1]}$')
-        ax_quad.scatter([x for x,y,s in st.session_state.tiga_titik], [y for x,y,s in st.session_state.tiga_titik], color='red', s=100, zorder=5, label='Titik yang Digunakan') # Perbesar ukuran titik
+        ax_quad.scatter([x for x,y,s in st.session_state.tiga_titik], [y for x,y,s in st.session_state.tiga_titik], color='red', s=100, zorder=5, label='Titik yang Digunakan')
         
-        # Atur batas sumbu Y secara dinamis atau lebih lebar
         min_y_val = min(y_plot) if len(y_plot) > 0 else -10
         max_y_val = max(y_plot) if len(y_plot) > 0 else 20
-        ax_quad.set_ylim(min_y_val - 5, max_y_val + 5) # Tambahkan margin pada Y
+        ax_quad.set_ylim(min_y_val - 5, max_y_val + 5)
 
         ax_quad.set_title("Grafik Fungsi Kuadrat")
         ax_quad.set_xlabel("x")
@@ -235,9 +233,9 @@ if st.session_state.langkah >= 5:
     
     opsi_faktorisasi = [
         faktorisasi_dict[kode][0],
-        "(x + 1)(x - 7)",
-        "(x - 5)(x - 2)",
-        "(x + 3)(x - 1)",
+        "(x + 1)(x - 7)", # Ganti opsi agar tidak sama dengan kasus lain
+        "(x - 5)(x - 2)", # Ganti opsi agar tidak sama dengan kasus lain
+        "(x + 3)(x - 1)", # Ganti opsi agar tidak sama dengan kasus lain
         "(x - 2)^2"
     ]
     random.shuffle(opsi_faktorisasi)
@@ -266,22 +264,26 @@ if st.session_state.langkah >= 5:
         Mari kita terapkan pada **Fungsi {kode}** yaitu $y = {fungsi_latex[kode].split('=')[1]}$:
         """)
 
-        # Tentukan nilai b dan c berdasarkan fungsi yang dipilih
+        # Tentukan nilai b dan c berdasarkan fungsi yang dipilih, serta p dan q
+        # Perhatikan bahwa p_val dan q_val di sini adalah akar-akar positif dari (x-p)(x-q)
+        # Jadi, jika faktorisasi adalah (x-2)(x-4), maka p=2, q=4.
+        # Dan bilangan yang dicari adalah -p dan -q, yaitu -2 dan -4.
         if kode == "Fungsi 1": # y = x^2 - 6x + 8
             b_val = -6
             c_val = 8
-            p_val = 2
-            q_val = 4
+            # Bilangan yang dicari adalah -p_val dan -q_val
+            bil_1 = -2
+            bil_2 = -4
         elif kode == "Fungsi 2": # y = x^2 - 5x + 6
             b_val = -5
             c_val = 6
-            p_val = 2
-            q_val = 3
+            bil_1 = -2
+            bil_2 = -3
         elif kode == "Fungsi 3": # y = x^2 - 4x + 3
             b_val = -4
             c_val = 3
-            p_val = 1
-            q_val = 3
+            bil_1 = -1
+            bil_2 = -3
         
         st.markdown(f"""
         Fungsi yang kita faktorkan adalah: ${fungsi_latex[kode].split('=')[1]}$
@@ -317,38 +319,39 @@ if st.session_state.langkah >= 5:
         **Langkah 2: Dari pasangan tersebut, cari yang hasil jumlahnya $b$ ($b = {b_val}$)**
         """)
 
+        # Perbaikan SyntaxError: Hapus satu backslash dari \\boxed
         if kode == "Fungsi 1":
             st.markdown(f"""
             Sekarang, mari kita jumlahkan pasangan-pasangan di atas untuk melihat mana yang hasilnya $-6$:
             * $1 + 8 = 9$ (bukan)
             * $-1 + (-8) = -9$ (bukan)
             * $2 + 4 = 6$ (bukan)
-            * $\\boxed{-2 + (-4) = -6}$ (cocok!)
+            * $\\boxed{{{bil_1} + {bil_2} = {b_val}}}$ (cocok!)
 
-            Kita menemukan bilangan tersebut adalah **-2 dan -4**.
+            Kita menemukan bilangan tersebut adalah **{bil_1} dan {bil_2}**.
             """)
         elif kode == "Fungsi 2":
             st.markdown(f"""
             Sekarang, mari kita jumlahkan pasangan-pasangan di atas untuk melihat mana yang hasilnya $-5$:
             * $1 + 6 = 7$ (bukan)
             * $-1 + (-6) = -7$ (bukan)
-            * $\\boxed{-2 + (-3) = -5}$ (cocok!)
+            * $\\boxed{{{bil_1} + {bil_2} = {b_val}}}$ (cocok!)
 
-            Kita menemukan bilangan tersebut adalah **-2 dan -3**.
+            Kita menemukan bilangan tersebut adalah **{bil_1} dan {bil_2}**.
             """)
         elif kode == "Fungsi 3":
             st.markdown(f"""
             Sekarang, mari kita jumlahkan pasangan-pasangan di atas untuk melihat mana yang hasilnya $-4$:
             * $1 + 3 = 4$ (bukan)
-            * $\\boxed{-1 + (-3) = -4}$ (cocok!)
+            * $\\boxed{{{bil_1} + {bil_2} = {b_val}}}$ (cocok!)
 
-            Kita menemukan bilangan tersebut adalah **-1 dan -3**.
+            Kita menemukan bilangan tersebut adalah **{bil_1} dan {bil_2}**.
             """)
 
         st.markdown(f"""
         **Langkah 3: Tuliskan dalam bentuk faktorisasi $(x - p)(x - q)$**
-        Karena bilangan yang kita temukan adalah ${-p_val}$ dan ${-q_val}$, maka faktorisasinya adalah:
-        $y = (x - {p_val})(x - {q_val})$
+        Karena bilangan yang kita temukan adalah ${bil_1}$ dan ${bil_2}$, maka kita bisa menuliskan ini sebagai:
+        $y = (x - ({bil_1}))(x - ({bil_2}))$
         Yang jika disederhanakan menjadi **$y = {faktorisasi_dict[kode][0]}$**
         """)
         
