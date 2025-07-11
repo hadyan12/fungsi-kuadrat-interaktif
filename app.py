@@ -31,19 +31,19 @@ def fungsi_rahasia(x):
     return (x - 2)*(x - 4) - 1  # y = x^2 - 6x + 7
 
 fungsi_pilihan = {
-    "f1": (lambda x: x**2 - 6*x + 7),
-    "f2": (lambda x: x**2 - 5*x + 6),
-    "f3": (lambda x: x**2 - 4*x + 3)
+    "Fungsi 1": (lambda x: x**2 - 6*x + 7),
+    "Fungsi 2": (lambda x: x**2 - 5*x + 6),
+    "Fungsi 3": (lambda x: x**2 - 4*x + 3)
 }
 fungsi_latex = {
-    "f1": "y = x^{2} - 6x + 7",
-    "f2": "y = x^{2} - 5x + 6",
-    "f3": "y = x^{2} - 4x + 3"
+    "Fungsi 1": "y = x^{2} - 6x + 7",
+    "Fungsi 2": "y = x^{2} - 5x + 6",
+    "Fungsi 3": "y = x^{2} - 4x + 3"
 }
 faktorisasi_dict = {
-    "f1": ["(x - 2)(x - 4)", 2, 4],
-    "f2": ["(x - 2)(x - 3)", 2, 3],
-    "f3": ["(x - 1)(x - 3)", 1, 3]
+    "Fungsi 1": ["(x - 2)(x - 4)", 2, 4],
+    "Fungsi 2": ["(x - 2)(x - 3)", 2, 3],
+    "Fungsi 3": ["(x - 1)(x - 3)", 1, 3]
 }
 
 if "data_titik" not in st.session_state:
@@ -78,8 +78,8 @@ if st.session_state.data_titik:
     x_vals, y_vals = zip(*st.session_state.data_titik)
     ax.scatter(x_vals, y_vals, color="green")
     for x, y in st.session_state.data_titik:
-        ax.axvline(x, linestyle="dotted", color="gray")
-        ax.axhline(y, linestyle="dotted", color="gray")
+        ax.axvline(x, ymax=(y+2)/(max(y_vals)+3), linestyle="dotted", color="gray")
+        ax.axhline(y, xmax=(x+2)/10, linestyle="dotted", color="gray")
         ax.text(x, y, f"({x},{y})", fontsize=8, ha='right')
     ax.set_title("Titik-titik (x, y)")
     ax.set_xlabel("x")
@@ -110,16 +110,17 @@ if st.session_state.langkah >= 2:
             y_manual_val = int(y_manual)
             y_benar = fungsi_rahasia(x_manual)
             hasil = "✅ Benar" if y_manual_val == y_benar else "❌ Salah"
-            st.session_state.input_manual.append((x_manual, y_manual_val, y_benar, hasil))
+            st.session_state.input_manual.append((x_manual, y_manual_val, hasil))
         except:
-            st.session_state.input_manual.append((x_manual, y_manual, "?", "⚠ Input tidak valid"))
+            st.session_state.input_manual.append((x_manual, y_manual, "⚠ Input tidak valid"))
 
     if st.session_state.input_manual:
         st.write("### Tabel Hasil Tebakanmu")
-        df2 = pd.DataFrame(st.session_state.input_manual, columns=["x", "y Tebakan", "y Sebenarnya", "Status"])
+        df2 = pd.DataFrame(st.session_state.input_manual, columns=["x", "y Tebakan", "Status"])
+        df2.index = df2.index + 1
         st.dataframe(df2)
 
-        benar_terakhir = [row for row in st.session_state.input_manual if row[3] == "✅ Benar"]
+        benar_terakhir = [row for row in st.session_state.input_manual if row[2] == "✅ Benar"]
         if len(benar_terakhir) >= 3:
             if st.button("➡ Lanjut ke Langkah 3"):
                 st.session_state.langkah = 3
@@ -135,9 +136,9 @@ if st.session_state.langkah >= 3:
     for x, y, *_ in titik:
         st.latex(f"({x}, {y})")
 
-    st.markdown("### Substitusi ke \( y = ax^{2} + bx + c \):")
+    st.markdown("### Substitusi ke \( y = ax^2 + bx + c \):")
     for x, y, *_ in titik:
-        st.latex(f"{y} = a \cdot {x}^{{2}} + b \cdot {x} + c")
+        st.latex(f"{y} = a x^2 + b x + c")
 
     if not st.session_state.sudah_eliminasi:
         if st.button("✍️ Saya sudah eliminasi"):
@@ -169,9 +170,9 @@ if st.session_state.langkah >= 4:
     st.markdown("Pilih salah satu fungsi kuadrat berikut untuk kamu faktorkan:")
 
     for k, rumus in fungsi_latex.items():
-        st.latex(rumus)
+        st.latex(f"{k}: {rumus}")
 
-    st.session_state.tebakan_fungsi = st.radio("Pilih salah satu:", list(fungsi_latex.keys()), key="radio_pilih_fungsi")
+    st.session_state.tebakan_fungsi = st.radio("Pilih salah satu:", list(fungsi_latex.keys()))
 
     if st.button("Cek Pilihan Fungsi"):
         st.session_state.fungsi_tersisa = [f for f in fungsi_latex if f != st.session_state.tebakan_fungsi]
@@ -185,11 +186,22 @@ if st.session_state.langkah >= 5:
     st.latex(fungsi_latex[kode])
     st.markdown("Apa faktorisasi dari fungsi ini?")
 
-    pilihan = st.radio("Pilih faktorisasi yang benar:", [faktorisasi_dict[kode][0], "(x - 1)(x - 7)", "(x - 3)^2"], key="radio_faktorisasi")
+    opsi_faktorisasi = [
+        faktorisasi_dict[kode][0],
+        "(x - 1)(x - 7)",
+        "(x - 3)^2",
+        "(x + 1)(x - 5)",
+        "(x - 2)^2"
+    ]
+
+    pilihan = st.radio("Pilih faktorisasi yang benar:", opsi_faktorisasi)
 
     if st.button("Cek Faktorisasi"):
         if pilihan == faktorisasi_dict[kode][0]:
-            st.success("✅ Benar! Sekarang kerjakan dua fungsi tersisa di buku tulis!")
+            st.success("✅ Benar! Ini pembahasannya:")
+            st.markdown(f"Langkah:")
+            st.latex(f"y = {fungsi_latex[kode].split('=')[1]}")
+            st.markdown("Carilah dua bilangan yang hasil kalinya sama dengan konstanta dan jumlahnya sama dengan koefisien tengah.")
             st.session_state.langkah = 6
             st.rerun()
         else:
@@ -200,20 +212,24 @@ if st.session_state.langkah >= 5:
 
 # ---------------------------- LANGKAH 6 ----------------------------
 if st.session_state.langkah >= 6:
-    st.header("🟥 Langkah 6: Akar dari Fungsi yang Difaktorkan")
-    st.markdown("Masukkan akar-akar dari fungsi tersebut.")
+    st.header("🟥 Langkah 6: Akar dari Dua Fungsi Lainnya")
+    st.markdown("Masukkan akar-akar dari dua fungsi kuadrat yang belum kamu pilih.")
 
-    kode = st.session_state.tebakan_fungsi
-    x1 = st.number_input("x₁:", key="x1")
-    x2 = st.number_input("x₂:", key="x2")
+    for fungsi_sisa in st.session_state.fungsi_tersisa:
+        st.latex(fungsi_latex[fungsi_sisa])
+        col1, col2 = st.columns(2)
+        with col1:
+            x1 = st.number_input(f"x₁ untuk {fungsi_sisa}", key=f"x1_{fungsi_sisa}")
+        with col2:
+            x2 = st.number_input(f"x₂ untuk {fungsi_sisa}", key=f"x2_{fungsi_sisa}")
 
-    if st.button("Cek Akar"):
-        benar_x1 = faktorisasi_dict[kode][1]
-        benar_x2 = faktorisasi_dict[kode][2]
-        if sorted([x1, x2]) == sorted([benar_x1, benar_x2]):
-            st.success("✅ Selamat! Akar-akarnya benar!")
-        else:
-            st.session_state.salah_input_x1x2 += 1
-            st.error("❌ Salah")
-            if st.session_state.salah_input_x1x2 >= 3:
-                st.info(f"Hint: Gunakan $ {faktorisasi_dict[kode][0]} = 0 $, lalu cari nilai x.")
+        if st.button(f"Cek Akar {fungsi_sisa}"):
+            benar_x1 = faktorisasi_dict[fungsi_sisa][1]
+            benar_x2 = faktorisasi_dict[fungsi_sisa][2]
+            if sorted([x1, x2]) == sorted([benar_x1, benar_x2]):
+                st.success(f"✅ Akar-akarnya benar untuk {fungsi_sisa}!")
+            else:
+                st.session_state.salah_input_x1x2 += 1
+                st.error("❌ Salah")
+                if st.session_state.salah_input_x1x2 >= 3:
+                    st.info(f"Hint: Gunakan $ {faktorisasi_dict[fungsi_sisa][0]} = 0 $, lalu cari nilai x.")
