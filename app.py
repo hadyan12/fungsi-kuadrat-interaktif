@@ -43,29 +43,39 @@ if "percobaan" not in st.session_state:
 # Langkah 1 - Eksplorasi
 if not st.session_state.step1_done:
     with st.expander("📘 Langkah 1: Eksplorasi Fungsi", expanded=True):
-        if st.session_state.percobaan < 3 and st.session_state.lanjut:
-            x = st.number_input(f"Percobaan ke-{st.session_state.percobaan + 1}: Masukkan nilai x (1–10):",
-                                min_value=1, max_value=10, step=1, key=f"x{st.session_state.percobaan}")
-            if st.button("Lihat hasil", key=f"cek{st.session_state.percobaan}"):
-                st.markdown(f"""
-                - x² = {x}² = {x**2}  
-                - 2x = 2 × {x} = {2*x}  
-                - Jumlah: {x**2} + {2*x} + 1 = {f(x)}  
-                ✅ Maka f({x}) = **{f(x)}**
-                """)
-                st.session_state.riwayat_x.append(x)
+        st.write("Masukkan nilai x dan lihat cara kerja fungsi.")
+
+        if "step1_show_lanjutan" not in st.session_state:
+            st.session_state.step1_show_lanjutan = False
+
+        x = st.number_input(f"Percobaan ke-{st.session_state.percobaan + 1}: Masukkan nilai x (1–10):",
+                            min_value=1, max_value=10, step=1, key=f"x{st.session_state.percobaan}")
+
+        if st.button("Lihat hasil", key=f"cek{st.session_state.percobaan}"):
+            st.markdown(f"""
+            - x² = {x}² = {x**2}  
+            - 2x = 2 × {x} = {2*x}  
+            - Jumlah: {x**2} + {2*x} + 1 = {f(x)}  
+            ✅ Maka f({x}) = **{f(x)}**
+            """)
+            st.session_state.riwayat_x.append(x)
+            st.session_state.step1_show_lanjutan = True
+
+        if st.session_state.step1_show_lanjutan:
+            if st.button("🔁 Coba nilai lain"):
                 st.session_state.percobaan += 1
+                st.session_state.step1_show_lanjutan = False
 
-                if st.session_state.percobaan < 3:
-                    lanjut = st.radio("🔁 Ingin mencoba nilai x lain?", ["ya", "tidak"], key=f"lanjut{st.session_state.percobaan}")
-                    st.session_state.lanjut = lanjut == "ya"
-                else:
-                    st.info("⚠️ Cuma bisa 3 kali saja 😊")
-                    st.session_state.step1_done = True
+            if st.button("❌ Selesai"):
+                st.session_state.step1_done = True
+                st.session_state.step1_show_lanjutan = False
 
-        elif st.session_state.percobaan >= 3 or not st.session_state.lanjut:
+        if st.session_state.percobaan >= 3:
+            st.info("⚠️ Cuma bisa 3 kali saja 😊")
             st.session_state.step1_done = True
-            st.write("📌 Riwayat nilai x yang sudah dicoba:", st.session_state.riwayat_x)
+            st.session_state.step1_show_lanjutan = False
+
+        st.write("📌 Riwayat nilai x:", st.session_state.riwayat_x)
 
 # Langkah 2 - Uji Pemahaman
 if st.session_state.step1_done and not st.session_state.step2_done:
