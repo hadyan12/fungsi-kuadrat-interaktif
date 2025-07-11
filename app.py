@@ -149,7 +149,7 @@ if st.session_state.step1_done and not st.session_state.step2_done:
 # Langkah 3 - Visualisasi
 if st.session_state.step2_done and st.session_state.x2_benar:
     with st.expander("📊 Langkah 3: Visualisasi Grafik"):
-        x_vals = list(range(1, 11))
+        x_vals = list(range(-11, 11))
         y_vals = [f(x) for x in x_vals]
 
         fig, ax = plt.subplots(figsize=(8, 5))
