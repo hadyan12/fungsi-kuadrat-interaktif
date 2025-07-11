@@ -5,12 +5,21 @@ import pandas as pd
 import random
 
 # ---------------------------- SETUP AWAL ----------------------------
-st.set_page_config(page_title="📐 Eksplorasi Fungsi Kuadrat", page_icon="📐")
-st.title("📐 Eksplorasi Mandiri Fungsi Kuadrat")
+# Mengganti icon penggaris (📐) dengan icon grafik naik (📈)
+st.set_page_config(page_title="📈 Eksplorasi Fungsi Kuadrat", page_icon="📈")
+st.title("📈 Eksplorasi Mandiri Fungsi Kuadrat")
+
+# Mengurangi ukuran teks pembuka
+st.markdown("""
+<style>
+.st-emotion-cache-1jm692r { /* Selector untuk teks markdown */
+    font-size: 1.1em; /* Mengurangi ukuran font */
+}
+</style>
+""", unsafe_allow_html=True)
 
 st.markdown("""
-Selamat datang di eksplorasi fungsi kuadrat! 🎓
-Kamu akan belajar lewat percobaan, analisis data, dan berpikir kritis. Bukan sekadar rumus, tapi *proses menemukan*.
+Selamat datang di eksplorasi fungsi kuadrat! 🎓 Kamu akan belajar lewat percobaan, analisis data, dan berpikir kritis. Bukan sekadar rumus, tapi **proses menemukan**.
 ---
 ## 🎯 Tujuan Pembelajaran
 - Menuliskan bentuk umum fungsi kuadrat dari data
@@ -272,9 +281,6 @@ if st.session_state.langkah >= 5:
         """)
 
         # Tentukan nilai b dan c berdasarkan fungsi yang dipilih, serta p dan q
-        # Perhatikan bahwa p_val dan q_val di sini adalah akar-akar positif dari (x-p)(x-q)
-        # Jadi, jika faktorisasi adalah (x-2)(x-4), maka p=2, q=4.
-        # Dan bilangan yang dicari adalah -p dan -q, yaitu -2 dan -4.
         if kode == "Fungsi 1": # y = x^2 - 6x + 8
             b_val = -6
             c_val = 8
@@ -314,15 +320,23 @@ if st.session_state.langkah >= 5:
         for pasangan in pasangan_jumlah:
             st.markdown(f"* {pasangan}")
 
+        # Perbaikan di sini: Membuat teks tidak padat dan lebih terstruktur
         st.markdown(f"""
         Kita menemukan bilangan tersebut adalah **{bil_1} dan {bil_2}**.
 
         **Langkah 3: Tuliskan dalam bentuk faktorisasi $(x - p)(x - q)$**
-        Perhatikan bahwa jika bilangan yang kita temukan adalah $P$ dan $Q$, maka faktorisasinya adalah $(x - P)(x - Q)$.
-        Dalam kasus ini, bilangan yang kita temukan adalah ${bil_1}$ dan ${bil_2}$.
-        Maka, faktorisasinya adalah:
-        $y = (x - ({bil_1}))(x - ({bil_2}))$
-        Yang jika disederhanakan menjadi **$y = {faktorisasi_dict[kode][0]}$**
+        """)
+        st.markdown("""
+        * Perhatikan bahwa jika bilangan yang kita temukan adalah $P$ dan $Q$, maka bentuk faktorisasinya adalah $(x - P)(x - Q)$.
+        """)
+        st.markdown(f"""
+        * Dalam kasus ini, bilangan yang kita temukan adalah ${bil_1}$ dan ${bil_2}$.
+        """)
+        st.markdown(f"""
+        * Maka, faktorisasinya adalah: $y = (x - ({bil_1}))(x - ({bil_2}))$
+        """)
+        st.markdown(f"""
+        * Yang jika disederhanakan menjadi **$y = {faktorisasi_dict[kode][0]}$**
         """)
         
         if st.button("➡ Lanjut ke Langkah 6"):
