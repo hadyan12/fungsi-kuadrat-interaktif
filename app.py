@@ -1,95 +1,142 @@
-# app.py
+# Fungsi Kuadrat Interaktif - Versi Eksploratif Lengkap
 import streamlit as st
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
 
-# ---------- Konfigurasi ----------
+# ---------------------------- SETUP AWAL ----------------------------
 st.set_page_config(page_title="📐 Eksplorasi Fungsi Kuadrat", page_icon="📐")
+st.title("📐 Eksplorasi Mandiri Fungsi Kuadrat")
 
-st.title("📐 Eksplorasi Fungsi Kuadrat")
 st.markdown("""
-Selamat datang! Di sini kamu akan **menemukan sendiri rumus fungsi kuadrat** dari data.  
-Jangan khawatir, kamu akan dibimbing secara bertahap 😊
+Selamat datang di eksplorasi fungsi kuadrat! 🎓
 
----  
+Kamu akan belajar lewat percobaan, analisis data, dan berpikir kritis. Bukan sekadar rumus, tapi *proses menemukan*.
+
+---
 ## 🎯 Tujuan Pembelajaran
-- Menuliskan bentuk umum fungsi kuadrat dari data.
-- Menentukan akar-akarnya menggunakan faktorisasi.
+- Menuliskan bentuk umum fungsi kuadrat dari data
+- Menentukan akar-akar dengan metode faktorisasi
 
+---
+## 🇮🇩 Profil Pelajar Pancasila
+- Bernalar kritis dan mandiri
+- Kreatif dalam menemukan pola
+- Bertanggung jawab atas proses belajar
+---
 """)
 
-# ---------- Fungsi Rahasia ----------
+# ---------------------------- INISIALISASI ----------------------------
 def fungsi_rahasia(x):
-    return 1 * (x - 2) * (x + 3)  # f(x) = x^2 + x - 6 → a=1, b=1, c=-6
+    return (x - 1)*(x - 3)  # f(x) = x^2 - 4x + 3
 
-# ---------- Inisialisasi ----------
-if "data_x" not in st.session_state:
-    st.session_state.data_x = []
-    st.session_state.data_fx = []
-    st.session_state.salah_tebakan = 0
-    st.session_state.langkah_2 = False
-    st.session_state.langkah_3 = False
+def bentuk_eksplisit(x):
+    return x**2 - 4*x + 3
 
-# ---------- LANGKAH 1 ----------
-st.header("🟩 Langkah 1: Masukkan Titik-titik Fungsi")
+if "data_titik" not in st.session_state:
+    st.session_state.data_titik = []
+    st.session_state.langkah = 1
+    st.session_state.salah_input_y = 0
+    st.session_state.jawaban_y = []
+    st.session_state.a = 1
+    st.session_state.b = -4
+    st.session_state.c = 3
+    st.session_state.faktorisasi_benar = False
 
-with st.form("form_input"):
-    x_val = st.number_input("Masukkan nilai x (antara -5 dan 5):", min_value=-5, max_value=5, step=1)
-    submitted = st.form_submit_button("Tambahkan titik")
+# ---------------------------- LANGKAH 1 ----------------------------
+if st.session_state.langkah == 1:
+    st.header("🟩 Langkah 1: Coba Masukkan Nilai x")
+    st.markdown("Masukkan beberapa nilai x (antara -5 sampai 7) dan amati nilai y = f(x)")
+    x_input = st.number_input("Nilai x:", min_value=-5, max_value=7, step=1)
+    if st.button("Tambah Titik"):
+        if x_input not in [x for x, y in st.session_state.data_titik]:
+            y_val = fungsi_rahasia(x_input)
+            st.session_state.data_titik.append((x_input, y_val))
+            st.session_state.jawaban_y.append("")
 
-    if submitted:
-        if x_val in st.session_state.data_x:
-            st.warning("❗ Nilai x ini sudah dimasukkan.")
-        else:
-            st.session_state.data_x.append(x_val)
-            st.session_state.data_fx.append(fungsi_rahasia(x_val))
+    if st.session_state.data_titik:
+        df = pd.DataFrame(st.session_state.data_titik, columns=["x", "y = f(x)"])
+        st.write("### 📊 Tabel Titik yang Diuji")
+        st.dataframe(df)
 
-if st.session_state.data_x:
-    st.subheader("📋 Tabel Titik")
-    st.table({"x": st.session_state.data_x, "f(x)": st.session_state.data_fx})
+        fig, ax = plt.subplots()
+        x_vals, y_vals = zip(*st.session_state.data_titik)
+        ax.scatter(x_vals, y_vals, color="green")
+        ax.set_title("Titik-titik f(x)")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.grid(True)
+        st.pyplot(fig)
 
-    # Grafik
-    fig, ax = plt.subplots()
-    warna = "red" if st.session_state.salah_tebakan >= 3 else "blue"
-    ax.scatter(st.session_state.data_x, st.session_state.data_fx, color=warna, s=100)
-    ax.axhline(0, color='black', linewidth=1)
-    ax.axvline(0, color='black', linewidth=1)
-    ax.set_title("Grafik Titik f(x)")
-    ax.grid(True)
-    ax.set_xlabel("x")
-    ax.set_ylabel("f(x)")
-    ax.set_xlim(-6, 6)
-    ax.set_ylim(min(st.session_state.data_fx) - 2, max(st.session_state.data_fx) + 2)
-    st.pyplot(fig)
+        if len(st.session_state.data_titik) >= 5:
+            if st.button("Lanjut ke Langkah 2"):
+                st.session_state.langkah = 2
+                st.rerun()
 
-    if len(st.session_state.data_x) >= 5:
-        if st.button("➡ Lanjut ke Langkah 2"):
-            st.session_state.langkah_2 = True
+# ---------------------------- LANGKAH 2 ----------------------------
+elif st.session_state.langkah == 2:
+    st.header("🟦 Langkah 2: Coba Tebak Nilai y")
+    st.markdown("Masukkan tebakan nilai **y** untuk setiap nilai **x** yang telah kamu coba.")
 
-# ---------- LANGKAH 2 ----------
-if st.session_state.langkah_2:
-    st.header("🟦 Langkah 2: Cocokkan Titik-titik dengan Fungsi")
+    salah_total = 0
+    for i, (x_val, y_true) in enumerate(st.session_state.data_titik):
+        tebakan = st.text_input(f"x = {x_val}, tebak y:", value=st.session_state.jawaban_y[i], key=f"y_tebak_{i}")
+        st.session_state.jawaban_y[i] = tebakan
 
-    st.markdown("Sekarang coba masukkan kembali titik-titik hasil f(x)-mu. Apakah cocok semua?")
-    
-    tebakan_x = st.number_input("Coba masukkan nilai x (ulang):", key="tebakan_x")
-    tebakan_fx = st.number_input("Apa nilai f(x) menurutmu?", key="tebakan_fx")
+        if tebakan.strip() != "":
+            try:
+                if int(tebakan) != y_true:
+                    salah_total += 1
+                    st.markdown(f"❌ Salah. y untuk x = {x_val} seharusnya bukan {tebakan}.")
+                else:
+                    st.markdown("✅ Benar")
+            except:
+                salah_total += 1
+                st.markdown("⚠ Masukkan harus berupa angka bulat.")
 
-    if st.button("✅ Cek Jawaban"):
-        benar = fungsi_rahasia(tebakan_x) == tebakan_fx
-        if benar:
-            st.success("✅ Benar! Titik ini cocok dengan fungsi yang sedang disembunyikan.")
-        else:
-            st.session_state.salah_tebakan += 1
-            st.error("❌ Belum cocok.")
-            
-            if st.session_state.salah_tebakan == 3:
-                st.warning("⚠️ Sudah 3 kali salah. Clue: Perhatikan di mana grafik memotong sumbu-x.")
+    if salah_total >= 1:
+        st.warning("Masih ada jawaban yang salah. Grafik akan ditandai merah.")
+        fig, ax = plt.subplots()
+        x_vals, y_vals = zip(*st.session_state.data_titik)
+        ax.scatter(x_vals, y_vals, color="red")
+        ax.set_title("Titik Salah")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.grid(True)
+        st.pyplot(fig)
+    else:
+        st.success("Semua tebakan benar!")
+        if st.button("➡ Lanjut ke Langkah 3"):
+            st.session_state.langkah = 3
+            st.rerun()
 
-            if st.session_state.salah_tebakan >= 5:
-                st.info("🧠 Bantuan: Gunakan 3 titik yang kamu punya. Masukkan ke bentuk umum:\n\n"
-                        r"$f(x) = ax^2 + bx + c$ lalu buat sistem persamaan. Kita akan bantu di langkah selanjutnya.")
-                st.session_state.langkah_3 = True
+    if salah_total >= 3:
+        st.info("""
+        🔍 **Petunjuk:**
+        - Ingat bahwa ini fungsi kuadrat.
+        - Lihat apakah perubahan y konsisten saat x naik 1 satuan.
+        - Gunakan pola kuadrat: y = ax² + bx + c
+        """)
 
-    if st.button("➡ Lanjut ke Langkah 3", key="next3"):
-        st.session_state.langkah_3 = True
+    if salah_total >= 5:
+        st.warning("""
+        ❗ Kamu sudah 5 kali salah.
+
+        Sekarang coba ambil 3 titik, misalnya:
+        (x₁, y₁), (x₂, y₂), (x₃, y₃)
+
+        Masukkan ke:
+        \[
+        y = ax^2 + bx + c
+        \]
+
+        Gunakan substitusi → dapat 3 persamaan.
+        Eliminasi → selesaikan di kertas ya!
+        """)
+
+# ---------------------------- LANGKAH SELANJUTNYA ----------------------------
+# Langkah 3–6 akan ditambahkan bertahap setelah konfirmasi langkah 1 & 2
+# (berisi eliminasi manual, input hasil, faktorisasi, dan cek akar)
+
+if st.session_state.langkah >= 3:
+    st.info("📌 Langkah 3 sampai 6 sedang dalam proses pembangunan tahap berikutnya.")
