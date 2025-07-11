@@ -53,7 +53,6 @@ if not st.session_state.step1_done:
         if f"{key_prefix}_x_final" not in st.session_state:
             st.session_state[f"{key_prefix}_x_final"] = None
 
-        # Jika hasil belum ditampilkan, tampilkan input x dan tombol
         if not st.session_state[f"{key_prefix}_show_result"]:
             x = st.number_input(
                 f"Percobaan ke-{current_try + 1}: Masukkan nilai x (1–10):",
@@ -65,7 +64,6 @@ if not st.session_state.step1_done:
                 st.session_state[f"{key_prefix}_x_final"] = x
                 st.session_state[f"{key_prefix}_show_result"] = True
 
-        # Jika hasil sudah ditampilkan, kunci nilai x dan tampilkan hasil + tombol lanjutan
         if st.session_state[f"{key_prefix}_show_result"]:
             x = st.session_state[f"{key_prefix}_x_final"]
             st.info(f"Percobaan ke-{current_try + 1}, nilai x = {x}")
@@ -82,23 +80,21 @@ if not st.session_state.step1_done:
                     if x not in st.session_state.riwayat_x:
                         st.session_state.riwayat_x.append(x)
                     st.session_state.percobaan += 1
-                    st.experimental_rerun()
+                    st.rerun()
 
             with col2:
                 if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
                     if x not in st.session_state.riwayat_x:
                         st.session_state.riwayat_x.append(x)
                     st.session_state.step1_done = True
-                    st.experimental_rerun()
+                    st.rerun()
 
             st.write("📌 Riwayat nilai x:", st.session_state.riwayat_x)
 
-        # Cegah lebih dari 3 percobaan
         if st.session_state.percobaan >= 3:
-            st.info("\u26a0\ufe0f Sudah 3 kali mencoba.")
+            st.info("⚠️ Sudah 3 kali mencoba.")
             st.session_state.step1_done = True
-            st.experimental_rerun()
-
+            st.rerun()
 
 # Langkah 2 - Uji Pemahaman
 if st.session_state.step1_done and not st.session_state.step2_done:
@@ -123,7 +119,6 @@ if st.session_state.step1_done and not st.session_state.step2_done:
                         st.error(f"❌ Masih belum tepat. Coba lagi ya. ({sisa} kesempatan lagi)")
                     else:
                         st.warning("🧠 Sudah 3 kali salah. Yuk kita bantu bareng, kamu tetap yang hitung:")
-                        # Langkah bantuan step-by-step
                         kuadrat = st.number_input(f"Langkah 1: Hitung {x2_input}² =", step=1, key="kuadrat_bantu")
                         kali_dua = st.number_input(f"Langkah 2: Hitung 2 × {x2_input} =", step=1, key="kali2_bantu")
                         total = st.number_input(f"Langkah 3: Hitung {kuadrat} + {kali_dua} + 1 =", step=1, key="total_bantu")
@@ -135,7 +130,7 @@ if st.session_state.step1_done and not st.session_state.step2_done:
                         else:
                             st.info("🔁 Cek kembali perhitunganmu ya!")
 
-# Langkah 3 - Visualisasi (muncul hanya jika jawaban benar)
+# Langkah 3 - Visualisasi
 if st.session_state.step2_done and st.session_state.x2_benar:
     with st.expander("📊 Langkah 3: Visualisasi Grafik"):
         x_vals = list(range(1, 11))
@@ -147,4 +142,5 @@ if st.session_state.step2_done and st.session_state.x2_benar:
         ax.set_xlabel("x")
         ax.set_ylabel("f(x)")
         ax.grid(True)
+
         st.pyplot(fig)
