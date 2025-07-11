@@ -22,10 +22,10 @@ st.markdown("""
 Selamat datang di eksplorasi fungsi kuadrat! 🎓 Kamu akan belajar lewat percobaan, analisis data, dan berpikir kritis. Bukan sekadar rumus, tapi **proses menemukan**.
 ---
 ## 🎯 Tujuan Pembelajaran
--	Mengenali apa itu Fungsi Kuadrat dan ciri-cirinya, baik dari bentuk umumnya 
--	Menjelaskan hubungan dari rumus umum fungsi kuadrat setiap titik di grafiknya.
--	Menemukan "akar-akar" atau solusi dari fungsi kuadrat dengan cara faktorisasi
--	Memecahkan masalah di kehidupan nyata yang ada hubungannya dengan fungsi kuadrat.
+- Mengenali apa itu Fungsi Kuadrat dan ciri-cirinya, baik dari bentuk umumnya 
+- Menjelaskan hubungan dari rumus umum fungsi kuadrat setiap titik di grafiknya.
+- Menemukan "akar-akar" atau solusi dari fungsi kuadrat dengan cara faktorisasi
+- Memecahkan masalah di kehidupan nyata yang ada hubungannya dengan fungsi kuadrat.
 ---
 ## 🇮🇩 Profil Pelajar Pancasila
 - Bernalar kritis dan mandiri
