@@ -2,143 +2,118 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="📐 Temukan Rumus Fungsi Kuadrat", page_icon="📐")
-
-st.title("📐 Temukan Sendiri Rumus Fungsi Kuadrat!")
+# Konfigurasi halaman
+st.set_page_config(page_title="Eksplorasi Fungsi Kuadrat", page_icon="🧮")
+st.title("🧮 Eksplorasi Interaktif Fungsi Kuadrat")
 
 st.markdown("""
-Selamat datang di ruang eksplorasi fungsi kuadrat!  
-Di sini kamu akan mencoba, mengamati, dan **menemukan sendiri** rumus fungsi kuadrat.  
+Selamat datang di modul eksplorasi fungsi kuadrat!  
+Kamu akan:
+- 🔍 Melakukan eksperimen nilai `x` dan melihat hasil `f(x)`
+- 🧠 Menebak rumus fungsi kuadrat berdasarkan data
+- 🧮 Menentukan akar-akar dari fungsi tersebut
 
----  
-
-## 🎯 Tujuan
-- Melakukan percobaan nilai
-- Menebak titik puncak fungsi kuadrat
-- Mengubah ke bentuk kuadrat sempurna  
-- Menguatkan pemahaman melalui *eksperimen, bukan hafalan!*
-
+> Tujuanmu hari ini: Menemukan bentuk umum fungsi kuadrat dan menentukan akarnya!
+---
 """)
 
-# Fungsi kuadrat tersembunyi: f(x) = (x - 2)^2 - 3 = x^2 - 4x + 1
-def fungsi_asli(x):
-    return x**2 - 4*x + 1  # titik puncak: (2, -3)
+# Fungsi asli yang akan ditebak siswa
+def fungsi_kuadrat(x):
+    return 1 * x**2 - 4 * x + 3  # Titik puncak (2, -1), akar 1 dan 3
 
-# Simpan data sesi
-if "x_list" not in st.session_state:
-    st.session_state.x_list = []
-    st.session_state.fx_list = []
-    st.session_state.langkah_2 = False
+# Session State
+if "x_vals" not in st.session_state:
+    st.session_state.x_vals = []
+    st.session_state.y_vals = []
     st.session_state.tebakan_salah = 0
-    st.session_state.bantuan_ditampilkan = False
-    st.session_state.langkah_3 = False
-    st.session_state.tebakan_benar = False
+    st.session_state.langkah_2 = False
+    st.session_state.benar = False
 
-### LANGKAH 1
-with st.expander("🔍 Langkah 1: Eksperimen Nilai x", expanded=not st.session_state.langkah_2):
-    st.write("Coba beberapa nilai x dan lihat hasil f(x).")
-    x = st.number_input("Masukkan nilai x:", value=0, step=1, key="x_input")
-    if st.button("➕ Tambahkan", key="tambah_x"):
-        if x not in st.session_state.x_list:
-            st.session_state.x_list.append(x)
-            st.session_state.fx_list.append(fungsi_asli(x))
+# Langkah 1: Eksplorasi Nilai
+with st.expander("📊 Langkah 1: Eksplorasi Nilai f(x) = ax² + bx + c", expanded=not st.session_state.langkah_2):
+    st.write("Masukkan nilai `x`, lalu klik tambahkan:")
+    x_input = st.number_input("Nilai x", step=1, value=0)
+    if st.button("➕ Tambahkan Nilai"):
+        if x_input not in st.session_state.x_vals:
+            st.session_state.x_vals.append(x_input)
+            st.session_state.y_vals.append(fungsi_kuadrat(x_input))
         else:
-            st.warning("❗ Nilai x ini sudah pernah kamu coba.")
+            st.warning("Nilai x sudah dicoba.")
 
-    if st.session_state.x_list:
-        st.markdown("### Data Percobaan")
-        data = {"x": st.session_state.x_list, "f(x)": st.session_state.fx_list}
-        st.table(data)
+    if st.session_state.x_vals:
+        st.subheader("📋 Tabel Nilai")
+        st.table({
+            "x": st.session_state.x_vals,
+            "f(x)": st.session_state.y_vals
+        })
 
-        x_vals = st.session_state.x_list
-        y_vals = st.session_state.fx_list
-        x_min, x_max = min(x_vals), max(x_vals)
-        margin = max(1, int((x_max - x_min) * 0.3))
+        # Grafik
+        x_range = np.linspace(min(st.session_state.x_vals)-2, max(st.session_state.x_vals)+2, 200)
+        y_range = fungsi_kuadrat(x_range)
 
         fig, ax = plt.subplots()
-        ax.scatter(x_vals, y_vals, color="blue")
-        ax.set_title("Titik-titik (x, f(x))")
+        ax.plot(x_range, y_range, label="f(x)", color="blue")
+        ax.scatter(st.session_state.x_vals, st.session_state.y_vals, color="red", label="Titik Percobaan")
         ax.set_xlabel("x")
         ax.set_ylabel("f(x)")
         ax.grid(True)
-        ax.set_xlim(x_min - margin, x_max + margin)
+        ax.legend()
         st.pyplot(fig)
 
-        if len(x_vals) >= 3:
-            if st.button("➡ Lanjut ke Langkah 2", key="next_step"):
+        if len(st.session_state.x_vals) >= 3:
+            if st.button("➡ Lanjut ke Tebak Rumus"):
                 st.session_state.langkah_2 = True
                 st.rerun()
 
-### LANGKAH 2
-if st.session_state.langkah_2 and not st.session_state.langkah_3:
-    with st.expander("🎯 Langkah 2: Tebak Titik Puncak", expanded=True):
-        st.markdown("""
-        Coba tebak koordinat titik puncak dari grafik:
-        \[
-        f(x) = a(x - h)^2 + k
-        \]
-        Masukkan tebakanmu untuk \( x \) dan \( f(x) \) pada titik puncak.
-        """)
+# Langkah 2: Tebak Rumus
+if st.session_state.langkah_2 and not st.session_state.benar:
+    with st.expander("✏️ Langkah 2: Tebak Bentuk Umum f(x)", expanded=True):
+        st.latex(r"f(x) = ax^2 + bx + c")
+        a = st.number_input("Tebakan a", value=1, step=1)
+        b = st.number_input("Tebakan b", value=0, step=1)
+        c = st.number_input("Tebakan c", value=0, step=1)
 
-        tebak_x = st.number_input("Tebakan x titik puncak (h):", value=0, step=1)
-        tebak_y = st.number_input("Tebakan f(x) titik puncak (k):", value=0, step=1)
+        def fungsi_tebakan(x):
+            return a * x**2 + b * x + c
 
-        if st.button("🔍 Cek Tebakan"):
-            if tebak_x == 2 and tebak_y == -3:
-                st.success("✅ Betul! Kamu telah menemukan titik puncaknya: (2, -3)")
-                st.session_state.tebakan_benar = True
-                st.session_state.langkah_3 = True
+        if st.button("✅ Cek Tebakan"):
+            cocok = True
+            for x_val, y_val in zip(st.session_state.x_vals, st.session_state.y_vals):
+                if fungsi_tebakan(x_val) != y_val:
+                    cocok = False
+                    break
+
+            if cocok:
+                st.success("🎉 Hebat! Tebakanmu benar!")
+                st.session_state.benar = True
             else:
                 st.session_state.tebakan_salah += 1
-                st.error("❌ Belum tepat. Coba lagi.")
-                if st.session_state.tebakan_salah >= 3:
-                    st.session_state.bantuan_ditampilkan = True
+                st.error(f"Tebakan belum tepat. Coba lagi! ({st.session_state.tebakan_salah}/3)")
 
-        if st.session_state.bantuan_ditampilkan and not st.session_state.tebakan_benar:
-            st.warning("💡 Bantuan: Menemukan Titik Puncak")
+        if st.session_state.tebakan_salah >= 3:
+            st.warning("⚠️ Sudah 3 kali salah. Yuk coba analisis data dengan cara ini:")
             st.markdown("""
-            Berikut langkah-langkah menemukan titik puncak dari data:
-
-            1. **Pilih 3 titik** dari tabel: misalnya (0, f(0)), (1, f(1)), (2, f(2))  
-            2. Cocokkan dengan bentuk umum:  
-            \[
-            f(x) = ax^2 + bx + c
-            \]
-            3. Gunakan sistem persamaan atau regresi (bisa manual/kalkulator) untuk cari \( a, b, c \)
-            4. Gunakan rumus titik puncak:
-            \[
-            x = \\frac{-b}{2a}
-            \]
-            5. Masukkan x ke rumus f(x) untuk dapat \( y \)
+            ### 💡 Langkah Bantuan:
+            1. Perhatikan perubahan nilai `f(x)` saat `x` bertambah satu-satu  
+            2. Hitung selisih antar nilai `f(x)` → apakah selisihnya tetap?
+            3. Jika tidak tetap, coba cek selisih kedua (second difference)  
+            4. Jika selisih kedua tetap, maka fungsi itu kuadrat!
+            5. Gunakan sistem persamaan dari 3 titik untuk menebak `a`, `b`, dan `c`
             """)
-            st.info("Contoh hasil: x = 2, f(x) = -3")
 
-### LANGKAH 3
-if st.session_state.langkah_3 and st.session_state.tebakan_benar:
-    with st.expander("🧠 Langkah 3: Bentuk Kuadrat Sempurna", expanded=True):
-        st.markdown("""
-        Kita ubah rumus fungsi yang kamu temukan ke bentuk **kuadrat sempurna**:
-        """)
-        st.latex(r"f(x) = a(x - h)^2 + k")
+# Langkah 3: Menentukan Akar
+if st.session_state.benar:
+    with st.expander("🧮 Langkah 3: Menentukan Akar Persamaan", expanded=True):
+        st.markdown("Setelah kamu mengetahui rumusnya:")
+        st.latex(f"f(x) = {a}x^2 + {b}x + {c}")
 
-        st.markdown("Dari eksperimen kita:")
-        st.latex(r"f(x) = x^2 - 4x + 1")
+        D = b**2 - 4*a*c
+        st.markdown(f"Diskriminan (D) = {b}² - 4({a})({c}) = {D}")
 
-        st.markdown("Ubah ke bentuk kuadrat sempurna:")
-        st.latex(r"f(x) = (x - 2)^2 - 3")
-
-        st.success("Jadi: Titik puncaknya ada di (2, -3)")
-
-        # Grafik fungsi lengkap
-        st.subheader("📊 Grafik Fungsi Lengkap")
-        x_range = np.linspace(2 - 10, 2 + 10, 400)
-        y_range = fungsi_asli(x_range)
-
-        fig, ax = plt.subplots(figsize=(8, 5))
-        ax.plot(x_range, y_range, label="f(x) = x² - 4x + 1", color="blue")
-        ax.axvline(2, color="red", linestyle="--", label="Sumbu Simetri (x=2)")
-        ax.plot(2, -3, "ro", label="Titik Puncak (2, -3)")
-        ax.scatter(st.session_state.x_list, st.session_state.fx_list, color="green", label="Titik Data")
-        ax.legend()
-        ax.grid(True)
-        st.pyplot(fig)
+        if D < 0:
+            st.error("Tidak ada akar real karena D < 0.")
+        else:
+            akar1 = (-b + D**0.5) / (2*a)
+            akar2 = (-b - D**0.5) / (2*a)
+            st.success(f"Akar-akarnya adalah: x₁ = {akar1:.2f}, x₂ = {akar2:.2f}")
+            st.latex(r"x = \frac{-b \pm \sqrt{D}}{2a}")
