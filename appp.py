@@ -150,6 +150,7 @@ if st.session_state.langkah >= 3:
             try:
                 if int(a) == 1 and int(b) == -6 and int(c) == 7:
                     st.success("✅ Jawaban benar! Bentuk umum fungsi kuadrat berhasil ditemukan.")
+                    st.session_state.fungsi_dipilih = "Fungsi 1"
                     st.session_state.langkah = 4
                     st.rerun()
                 else:
@@ -162,20 +163,42 @@ if st.session_state.langkah >= 3:
 
 # ---------------------------- LANGKAH 4 ----------------------------
 if st.session_state.langkah >= 4:
-    st.header("🟧 Langkah 4: Pilih Fungsi untuk Difaktorkan")
-    for k, rumus in fungsi_latex.items():
-        st.latex(f"{k}: {rumus}")
+    st.header("🟧 Langkah 4: Tampilkan Fungsi dan Grafik")
+    st.markdown("Berikut ini adalah bentuk umum fungsi kuadrat yang telah kamu temukan:")
+    kode = st.session_state.fungsi_dipilih
+    st.latex(fungsi_latex[kode])
 
-    st.session_state.tebakan_fungsi = st.radio("Pilih salah satu fungsi kuadrat di atas untuk difaktorkan:", list(fungsi_latex.keys()))
+    x = np.linspace(-10, 10, 400)
+    y = fungsi_kuadrat_dict[kode](x)
 
-    if st.button("Lanjut Faktorisasi"):
-        st.session_state.fungsi_tersisa = [f for f in fungsi_latex if f != st.session_state.tebakan_fungsi]
+    fig, ax = plt.subplots()
+    ax.plot(x, y, color='orange', linewidth=2)
+    ax.axhline(0, color='black', linewidth=1)
+    ax.axvline(0, color='black', linewidth=1)
+    ax.set_facecolor('white')
+    ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    st.pyplot(fig)
+
+    if st.button("Lanjut ke Langkah 5"):
         st.session_state.langkah = 5
         st.rerun()
 
 # ---------------------------- LANGKAH 5 ----------------------------
 if st.session_state.langkah >= 5:
     st.header("🟪 Langkah 5: Faktorisasi Fungsi")
+    st.markdown("Pilih salah satu fungsi kuadrat berikut untuk kamu faktorkan:")
+
+    for k, rumus in fungsi_latex.items():
+        st.latex(f"{k}: {rumus}")
+
+    st.session_state.tebakan_fungsi = st.radio("Pilih salah satu:", list(fungsi_latex.keys()))
+
+    if st.button("Cek Pilihan Fungsi"):
+        st.session_state.fungsi_tersisa = [f for f in fungsi_latex if f != st.session_state.tebakan_fungsi]
+        st.rerun()
+
     kode = st.session_state.tebakan_fungsi
     st.latex(fungsi_latex[kode])
 
@@ -186,6 +209,7 @@ if st.session_state.langkah >= 5:
         "(x + 1)(x - 5)",
         "(x - 2)^2"
     ]
+    random.shuffle(opsi_faktorisasi)
 
     pilihan = st.radio("Pilih faktorisasi yang benar:", opsi_faktorisasi)
 
