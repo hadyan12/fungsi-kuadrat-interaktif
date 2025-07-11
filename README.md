@@ -1,0 +1,1 @@
+# fungsi-kuadrat-interaktif
