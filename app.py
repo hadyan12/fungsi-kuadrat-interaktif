@@ -72,14 +72,14 @@ if st.session_state.step1_done and not st.session_state.step2_done:
     with st.expander("📗 Langkah 2: Uji Pemahaman", expanded=True):
         st.write("Sekarang coba hitung **sendiri**, pakai nilai x yang **belum dipakai sebelumnya**.")
 
-        x2 = st.number_input("Masukkan nilai x baru:", min_value=1, max_value=10, step=1, key="x2")
-        if x2 in st.session_state.riwayat_x:
+        x2_input = st.number_input("Masukkan nilai x baru:", min_value=1, max_value=10, step=1, key="x2_input")
+        if x2_input in st.session_state.riwayat_x:
             st.warning("⚠️ Nilai ini sudah digunakan. Coba nilai lain.")
         else:
-            jawaban = st.number_input(f"Hitung: f({x2}) = {x2}² + 2×{x2} + 1 = ... ?", step=1, key="jawaban")
+            jawaban = st.number_input(f"Hitung: f({x2_input}) = {x2_input}² + 2×{x2_input} + 1 = ... ?", step=1, key="jawaban_input")
 
             if st.button("Cek Jawaban", key="cekjawaban"):
-                if jawaban == f(x2):
+                if jawaban == f(x2_input):
                     st.success("✅ Jawabanmu benar! Kamu hebat.")
                     st.session_state.step2_done = True
                     st.session_state.x2_benar = True
@@ -91,12 +91,12 @@ if st.session_state.step1_done and not st.session_state.step2_done:
                     else:
                         st.warning("🧠 Sudah 3 kali salah. Yuk kita bantu bareng, kamu tetap yang hitung:")
                         # Langkah bantuan step-by-step
-                        kuadrat = st.number_input(f"Langkah 1: Hitung {x2}² =", step=1, key="kuadrat")
-                        kali_dua = st.number_input(f"Langkah 2: Hitung 2 × {x2} =", step=1, key="kali2")
-                        total = st.number_input(f"Langkah 3: Hitung {kuadrat} + {kali_dua} + 1 =", step=1, key="total")
+                        kuadrat = st.number_input(f"Langkah 1: Hitung {x2_input}² =", step=1, key="kuadrat_bantu")
+                        kali_dua = st.number_input(f"Langkah 2: Hitung 2 × {x2_input} =", step=1, key="kali2_bantu")
+                        total = st.number_input(f"Langkah 3: Hitung {kuadrat} + {kali_dua} + 1 =", step=1, key="total_bantu")
 
-                        if kuadrat == x2**2 and kali_dua == 2 * x2 and total == f(x2):
-                            st.success(f"✅ Betul! Maka f({x2}) = {total}")
+                        if kuadrat == x2_input**2 and kali_dua == 2 * x2_input and total == f(x2_input):
+                            st.success(f"✅ Betul! Maka f({x2_input}) = {total}")
                             st.session_state.step2_done = True
                             st.session_state.x2_benar = True
                         else:
