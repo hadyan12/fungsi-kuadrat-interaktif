@@ -42,7 +42,7 @@ if "percobaan" not in st.session_state:
 
 # Langkah 1 - Eksplorasi
 if not st.session_state.step1_done:
-    with st.expander("📘 Langkah 1: Eksplorasi Fungsi", expanded=True):
+    with st.expander("\U0001F4D8 Langkah 1: Eksplorasi Fungsi", expanded=True):
         st.write("Masukkan nilai x dan tekan tombol **Lihat hasil** untuk melihat bagaimana fungsi bekerja.")
 
         current_try = st.session_state.percobaan
@@ -53,6 +53,7 @@ if not st.session_state.step1_done:
         if f"{key_prefix}_x_final" not in st.session_state:
             st.session_state[f"{key_prefix}_x_final"] = None
 
+        # Jika hasil belum ditampilkan, tampilkan input x dan tombol
         if not st.session_state[f"{key_prefix}_show_result"]:
             x = st.number_input(
                 f"Percobaan ke-{current_try + 1}: Masukkan nilai x (1–10):",
@@ -60,13 +61,11 @@ if not st.session_state.step1_done:
                 key=f"{key_prefix}_x"
             )
 
-            if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
-                if x not in st.session_state.riwayat_x:
-                    st.session_state.riwayat_x.append(x)
-                st.session_state.step1_done = True
-                st.experimental_rerun()  
+            if st.button("\U0001F4E5 Lihat hasil", key=f"{key_prefix}_lihat"):
+                st.session_state[f"{key_prefix}_x_final"] = x
+                st.session_state[f"{key_prefix}_show_result"] = True
 
-
+        # Jika hasil sudah ditampilkan, kunci nilai x dan tampilkan hasil + tombol lanjutan
         if st.session_state[f"{key_prefix}_show_result"]:
             x = st.session_state[f"{key_prefix}_x_final"]
             st.info(f"Percobaan ke-{current_try + 1}, nilai x = {x}")
@@ -83,19 +82,22 @@ if not st.session_state.step1_done:
                     if x not in st.session_state.riwayat_x:
                         st.session_state.riwayat_x.append(x)
                     st.session_state.percobaan += 1
+                    st.experimental_rerun()
+
             with col2:
                 if st.button("❌ Selesai", key=f"{key_prefix}_selesai"):
                     if x not in st.session_state.riwayat_x:
                         st.session_state.riwayat_x.append(x)
                     st.session_state.step1_done = True
+                    st.experimental_rerun()
 
             st.write("📌 Riwayat nilai x:", st.session_state.riwayat_x)
 
+        # Cegah lebih dari 3 percobaan
         if st.session_state.percobaan >= 3:
-            st.info("⚠️ Sudah 3 kali mencoba.")
+            st.info("\u26a0\ufe0f Sudah 3 kali mencoba.")
             st.session_state.step1_done = True
-
-
+            st.experimental_rerun()
 
 
 # Langkah 2 - Uji Pemahaman
