@@ -57,45 +57,45 @@ if "data_titik" not in st.session_state:
     st.session_state.tebakan_fungsi = ""
     st.session_state.fungsi_tersisa = []
     st.session_state.salah_input_x1x2 = 0
+    st.session_state.tiga_titik = []
 
 # ---------------------------- LANGKAH 1 ----------------------------
-if st.session_state.langkah == 1:
-    st.header("🟩 Langkah 1: Masukkan Titik-titik")
-    st.markdown("Masukkan nilai x antara -2 sampai 7 untuk melihat nilai y")
+st.header("🟩 Langkah 1: Masukkan Titik-titik")
+st.markdown("Masukkan nilai x antara -2 sampai 7 untuk melihat nilai y")
 
-    x_input = st.number_input("Nilai x:", min_value=-2, max_value=7, step=1)
-    if st.button("Tambah Titik"):
-        if x_input not in [x for x, _ in st.session_state.data_titik]:
-            y_val = fungsi_rahasia(x_input)
-            st.session_state.data_titik.append((x_input, y_val))
+x_input = st.number_input("Nilai x:", min_value=-2, max_value=7, step=1, key="x_input")
+if st.button("Tambah Titik"):
+    if x_input not in [x for x, _ in st.session_state.data_titik]:
+        y_val = fungsi_rahasia(x_input)
+        st.session_state.data_titik.append((x_input, y_val))
 
-    if st.session_state.data_titik:
-        df = pd.DataFrame(st.session_state.data_titik, columns=["x", "y"])
-        st.write("### Tabel Titik")
-        st.dataframe(df)
+if st.session_state.data_titik:
+    df = pd.DataFrame(st.session_state.data_titik, columns=["x", "y"])
+    st.write("### Tabel Titik")
+    st.dataframe(df)
 
-        fig, ax = plt.subplots()
-        x_vals, y_vals = zip(*st.session_state.data_titik)
-        ax.scatter(x_vals, y_vals, color="green")
-        for x, y in st.session_state.data_titik:
-            ax.axvline(x, linestyle="dotted", color="gray")
-            ax.axhline(y, linestyle="dotted", color="gray")
-            ax.text(x, y, f"({x},{y})", fontsize=8, ha='right')
-        ax.set_title("Titik-titik (x, y)")
-        ax.set_xlabel("x")
-        ax.set_ylabel("y")
-        ax.set_xticks(range(-2, 8))
-        ax.set_yticks(range(min(y_vals)-2, max(y_vals)+3))
-        ax.grid(True)
-        st.pyplot(fig)
+    fig, ax = plt.subplots()
+    x_vals, y_vals = zip(*st.session_state.data_titik)
+    ax.scatter(x_vals, y_vals, color="green")
+    for x, y in st.session_state.data_titik:
+        ax.axvline(x, linestyle="dotted", color="gray")
+        ax.axhline(y, linestyle="dotted", color="gray")
+        ax.text(x, y, f"({x},{y})", fontsize=8, ha='right')
+    ax.set_title("Titik-titik (x, y)")
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_xticks(range(-2, 8))
+    ax.set_yticks(range(min(y_vals)-2, max(y_vals)+3))
+    ax.grid(True)
+    st.pyplot(fig)
 
-        if len(st.session_state.data_titik) >= 5:
-            if st.button("➡ Lanjut ke Langkah 2"):
-                st.session_state.langkah = 2
-                st.rerun()
+    if len(st.session_state.data_titik) >= 5:
+        if st.button("➡ Lanjut ke Langkah 2"):
+            st.session_state.langkah = 2
+            st.rerun()
 
 # ---------------------------- LANGKAH 2 ----------------------------
-elif st.session_state.langkah == 2:
+if st.session_state.langkah >= 2:
     st.header("🟦 Langkah 2: Tebak y dari Nilai x")
     st.markdown("Masukkan **nilai x dan y** yang kamu tebak. Sistem akan mencocokkan dengan fungsi yang tersembunyi.")
 
@@ -127,7 +127,7 @@ elif st.session_state.langkah == 2:
                 st.rerun()
 
 # ---------------------------- LANGKAH 3 ----------------------------
-elif st.session_state.langkah == 3:
+if st.session_state.langkah >= 3:
     st.header("🟨 Langkah 3: Substitusi dan Eliminasi")
     st.markdown("Gunakan 3 titik dari tebakan benar untuk membentuk sistem persamaan kuadrat.")
 
@@ -164,14 +164,14 @@ elif st.session_state.langkah == 3:
                 st.error("Masukkan harus berupa bilangan bulat")
 
 # ---------------------------- LANGKAH 4 ----------------------------
-elif st.session_state.langkah == 4:
+if st.session_state.langkah >= 4:
     st.header("🟧 Langkah 4: Pilih Fungsi")
     st.markdown("Pilih salah satu fungsi kuadrat berikut untuk kamu faktorkan:")
 
     for k, rumus in fungsi_latex.items():
         st.latex(rumus)
 
-    st.session_state.tebakan_fungsi = st.radio("Pilih salah satu:", list(fungsi_latex.keys()))
+    st.session_state.tebakan_fungsi = st.radio("Pilih salah satu:", list(fungsi_latex.keys()), key="radio_pilih_fungsi")
 
     if st.button("Cek Pilihan Fungsi"):
         st.session_state.fungsi_tersisa = [f for f in fungsi_latex if f != st.session_state.tebakan_fungsi]
@@ -179,7 +179,7 @@ elif st.session_state.langkah == 4:
         st.rerun()
 
 # ---------------------------- LANGKAH 5 ----------------------------
-elif st.session_state.langkah == 5:
+if st.session_state.langkah >= 5:
     st.header("🟪 Langkah 5: Faktorisasi Fungsi Pilihan")
     kode = st.session_state.tebakan_fungsi
     st.latex(fungsi_latex[kode])
@@ -199,7 +199,7 @@ elif st.session_state.langkah == 5:
                 st.info("Hint: Perhatikan koefisien tengah dan konstanta.")
 
 # ---------------------------- LANGKAH 6 ----------------------------
-elif st.session_state.langkah == 6:
+if st.session_state.langkah >= 6:
     st.header("🟥 Langkah 6: Akar dari Fungsi yang Difaktorkan")
     st.markdown("Masukkan akar-akar dari fungsi tersebut.")
 
@@ -216,4 +216,4 @@ elif st.session_state.langkah == 6:
             st.session_state.salah_input_x1x2 += 1
             st.error("❌ Salah")
             if st.session_state.salah_input_x1x2 >= 3:
-                st.info(f"Hint: Gunakan \( {faktorisasi_dict[kode][0]} = 0 \), lalu cari x.")
+                st.info(f"Hint: Gunakan $ {faktorisasi_dict[kode][0]} = 0 $, lalu cari nilai x.")
