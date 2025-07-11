@@ -111,7 +111,7 @@ if st.session_state.langkah >= 3:
 
     st.markdown("### Substitusi ke \( y = ax^2 + bx + c \):")
     for x, y, *_ in titik:
-        st.latex(f"{y} = a({x})^2 + b({x}) + c")
+        st.latex(f"{y} = a \cdot {x}^2 + b \cdot {x} + c")
 
     if not st.session_state.sudah_eliminasi:
         if st.button("✍️ Saya sudah eliminasi"):
@@ -189,6 +189,6 @@ if st.session_state.langkah == 6:
     st.markdown("Sekarang kita lihat akar-akarnya dari faktorisasi tadi:")
 
     st.latex("(x - 2)(x - 4) = 0")
-    st.latex("x = 2 \\quad atau \\quad x = 4")
+    st.latex("x = 2 \\quad \text{atau} \\quad x = 4")
 
     st.success("✅ Selamat! Kamu telah menemukan akar-akar fungsi kuadrat dengan eksplorasi mandiri.")
