@@ -8,7 +8,7 @@ import random
 st.set_page_config(page_title="📐 Eksplorasi Fungsi Kuadrat", page_icon="📐")
 st.title("📐 Eksplorasi Mandiri Fungsi Kuadrat")
 
-st.markdown("""
+st.markdown(""
 Selamat datang di eksplorasi fungsi kuadrat! 🎓
 Kamu akan belajar lewat percobaan, analisis data, dan berpikir kritis. Bukan sekadar rumus, tapi *proses menemukan*.
 ---
